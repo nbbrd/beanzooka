@@ -20,101 +20,134 @@ import ec.util.desktop.Desktop;
 import ec.util.desktop.DesktopManager;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
+import java.awt.event.ItemEvent;
+import java.beans.PropertyChangeEvent;
+import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JList;
 import javax.swing.JMenu;
+import javax.swing.event.ListSelectionEvent;
 import nbbrd.nbpl.core.App;
 import nbbrd.nbpl.core.Config;
-import nbbrd.nbpl.core.Job;
+import nbbrd.nbpl.core.Scenario;
 import nbbrd.nbpl.core.Plugin;
-import nbbrd.nbpl.core.Settings;
+import nbbrd.nbpl.core.Resources;
 import nbbrd.nbpl.core.UserDir;
 
 /**
  *
  * @author Philippe Charles
  */
-public final class SettingsPanel extends javax.swing.JPanel {
+public final class ResourcesPanel extends javax.swing.JPanel {
 
-    public static final String SETTINGS_PROPERTY = "settings";
-    public static final String JOB_PROPERTY = "job";
+    public static final String RESOURCES_PROPERTY = "resources";
+    public static final String SCENARIO_PROPERTY = "scenario";
 
-    private final OpenPluginLocation openPlugin;
+    public static final String OPEN_PLUGIN_ACTION = "openPlugin";
 
-    private Settings settings;
-    private Job job;
+    private Resources resources;
+    private Scenario scenario;
 
-    public SettingsPanel() {
+    public ResourcesPanel() {
         initComponents();
+        initComponents2();
+    }
 
-        this.openPlugin = new OpenPluginLocation();
+    public Resources getResources() {
+        return resources;
+    }
+
+    public void setResources(Resources resources) {
+        firePropertyChange(RESOURCES_PROPERTY, this.resources, this.resources = resources);
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public void setScenario(Scenario scenario) {
+        firePropertyChange(SCENARIO_PROPERTY, this.scenario, this.scenario = scenario);
+    }
+
+    private void initComponents2() {
+        OpenPluginLocation openPlugin = new OpenPluginLocation();
+        SwingUtil.onDoubleClick(plugins, openPlugin);
+        getActionMap().put(OPEN_PLUGIN_ACTION, openPlugin.toAction(plugins));
 
         apps.setRenderer(JLists.cellRendererOf(Renderers::renderApp));
-        apps.addItemListener(o -> computeJob());
+        apps.addItemListener(this::onAppsChange);
 
         configs.setRenderer(JLists.cellRendererOf(Renderers::renderConfig));
-        configs.addItemListener(o -> computeJob());
+        configs.addItemListener(this::onConfigsChange);
 
         userDirs.setRenderer(JLists.cellRendererOf(Renderers::renderUserDir));
-        userDirs.addItemListener(o -> computeJob());
+        userDirs.addItemListener(this::onUserDirsChange);
 
         plugins.setCellRenderer(JLists.cellRendererOf(Renderers::renderPlugin));
+        plugins.addListSelectionListener(this::onPluginsChange);
         plugins.setComponentPopupMenu(getPluginsMenu().getPopupMenu());
-        plugins.addListSelectionListener(o -> computeJob());
-        SwingUtil.onDoubleClick(plugins, openPlugin);
 
-        addPropertyChangeListener(o -> {
-            switch (o.getPropertyName()) {
-                case SETTINGS_PROPERTY:
-                    onSettingsChange();
-                    break;
-                case JOB_PROPERTY:
-                    onJobChange();
-                    break;
-            }
-        });
+        addPropertyChangeListener(RESOURCES_PROPERTY, this::onResourcesChange);
+        addPropertyChangeListener(SCENARIO_PROPERTY, this::onScenarioChange);
     }
 
     private JMenu getPluginsMenu() {
+        ActionMap am = getActionMap();
         JMenu result = new JMenu();
-        result.add(openPlugin.toAction(plugins)).setText("Open plugin location");
+        result.add(am.get(OPEN_PLUGIN_ACTION)).setText("Open plugin location");
         return result;
     }
 
-    private void onSettingsChange() {
-        if (settings != null) {
-            apps.setModel(SwingUtil.modelOf(settings.getApps()));
-            configs.setModel(SwingUtil.modelOf(settings.getConfigs()));
-            userDirs.setModel(SwingUtil.modelOf(SwingUtil.concat(UserDir.TEMP, settings.getUserDirs())));
-            plugins.setModel(SwingUtil.modelOf(settings.getPlugins()));
+    private void onAppsChange(ItemEvent event) {
+        updateScenario();
+    }
+
+    private void onConfigsChange(ItemEvent event) {
+        updateScenario();
+    }
+
+    private void onUserDirsChange(ItemEvent event) {
+        updateScenario();
+    }
+
+    private void onPluginsChange(ListSelectionEvent event) {
+        updateScenario();
+    }
+
+    private void onResourcesChange(PropertyChangeEvent event) {
+        if (resources != null) {
+            apps.setModel(SwingUtil.modelOf(resources.getApps()));
+            configs.setModel(SwingUtil.modelOf(resources.getConfigs()));
+            userDirs.setModel(SwingUtil.modelOf(SwingUtil.concat(UserDir.TEMP, resources.getUserDirs())));
+            plugins.setModel(SwingUtil.modelOf(resources.getPlugins()));
         } else {
             apps.setModel(new DefaultComboBoxModel());
             configs.setModel(new DefaultComboBoxModel());
             userDirs.setModel(new DefaultComboBoxModel());
             plugins.setModel(new DefaultComboBoxModel());
         }
-        computeJob();
+        updateScenario();
     }
 
-    private void onJobChange() {
-        if (job != null) {
-            apps.setSelectedItem(job.getApp());
-            configs.setSelectedItem(job.getConfig());
-            userDirs.setSelectedItem(job.getUserDir());
+    private void onScenarioChange(PropertyChangeEvent event) {
+        if (scenario != null) {
+            apps.setSelectedItem(scenario.getApp());
+            configs.setSelectedItem(scenario.getConfig());
+            userDirs.setSelectedItem(scenario.getUserDir());
 //        plugins.setSelectedIndices(job.getPlugins().stream().mapToInt(plugins.get));
         } else {
             apps.setSelectedItem(null);
             configs.setSelectedItem(null);
             userDirs.setSelectedItem(null);
-            plugins.setSelectedIndex(-1);;
+            plugins.setSelectedIndex(-1);
         }
     }
 
-    private void computeJob() {
+    private void updateScenario() {
         if (apps.getSelectedIndex() != -1
                 && configs.getSelectedIndex() != -1
                 && userDirs.getSelectedIndex() != -1) {
-            setJob(Job
+            setScenario(Scenario
                     .builder()
                     .app((App) apps.getSelectedItem())
                     .config((Config) configs.getSelectedItem())
@@ -122,28 +155,8 @@ public final class SettingsPanel extends javax.swing.JPanel {
                     .plugins(plugins.getSelectedValuesList())
                     .build());
         } else {
-            setJob(null);
+            setScenario(null);
         }
-    }
-
-    public Settings getSettings() {
-        return settings;
-    }
-
-    public void setSettings(Settings settings) {
-        Settings old = this.settings;
-        this.settings = settings;
-        firePropertyChange(SETTINGS_PROPERTY, old, this.settings);
-    }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        Job old = this.job;
-        this.job = job;
-        firePropertyChange(JOB_PROPERTY, old, this.job);
     }
 
     private static final class OpenPluginLocation extends JCommand<JList<Plugin>> {

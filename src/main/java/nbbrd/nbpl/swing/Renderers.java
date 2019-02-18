@@ -19,11 +19,11 @@ package nbbrd.nbpl.swing;
 import ec.util.various.swing.FontAwesome;
 import java.awt.Color;
 import java.io.File;
+import java.util.function.Function;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 import nbbrd.nbpl.core.App;
 import nbbrd.nbpl.core.Config;
-import nbbrd.nbpl.core.HasLabel;
 import nbbrd.nbpl.core.Plugin;
 import nbbrd.nbpl.core.UserDir;
 
@@ -35,7 +35,7 @@ import nbbrd.nbpl.core.UserDir;
 class Renderers {
 
     void renderApp(JLabel label, App value) {
-        setText(label, value);
+        setText(label, value, App::getLabel);
         if (value != null) {
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
@@ -43,7 +43,7 @@ class Renderers {
     }
 
     void renderConfig(JLabel label, Config value) {
-        setText(label, value);
+        setText(label, value, Config::getLabel);
         if (value != null) {
             label.setToolTipText(value.getJavaFile().toString());
             setIfInvalidFile(label, value.getJavaFile());
@@ -51,7 +51,7 @@ class Renderers {
     }
 
     void renderUserDir(JLabel label, UserDir value) {
-        setText(label, value);
+        setText(label, value, UserDir::getLabel);
         if (value != null) {
             label.setToolTipText(value.getFolder().toString());
             if (value.isClone()) {
@@ -69,7 +69,7 @@ class Renderers {
     }
 
     void renderPlugin(JLabel label, Plugin value) {
-        setText(label, value);
+        setText(label, value, Plugin::getLabel);
         if (value != null) {
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
@@ -80,9 +80,9 @@ class Renderers {
         label.setText(value.name());
     }
 
-    private void setText(JLabel label, HasLabel value) {
+    private <T> void setText(JLabel label, T value, Function<T, String> toLabel) {
         if (value != null) {
-            label.setText(value.getLabel());
+            label.setText(toLabel.apply(value));
         }
     }
 

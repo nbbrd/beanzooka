@@ -21,9 +21,13 @@ import ec.util.desktop.DesktopManager;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.JCommand;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ActionMap;
 import javax.swing.JMenu;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
+import javax.swing.table.AbstractTableModel;
 import nbbrd.nbpl.core.App;
 import nbbrd.nbpl.core.Config;
 import nbbrd.nbpl.core.UserDir;
@@ -32,22 +36,29 @@ import nbbrd.nbpl.core.UserDir;
  *
  * @author Philippe Charles
  */
-public class SessionsPanel extends javax.swing.JPanel {
+public final class SessionsPanel extends javax.swing.JPanel {
+
+    public static final String OPEN_WORKING_DIR_ACTION = "openWorkingDir";
+    public static final String OPEN_LOGS_ACTION = "openLogs";
 
     private final SessionTableModel sessionModel;
 
-    private final Desktop desktop;
-    private final OpenWorkingDir openWorkingDir;
-    private final OpenLogs openLogs;
-
     public SessionsPanel() {
-        initComponents();
-
         this.sessionModel = new SessionTableModel();
+        initComponents();
+        initComponents2();
+    }
 
-        this.desktop = DesktopManager.get();
-        this.openWorkingDir = new OpenWorkingDir(desktop);
-        this.openLogs = new OpenLogs(desktop);
+    public void add(Session session) {
+        sessionModel.add(session);
+    }
+
+    private void initComponents2() {
+        OpenWorkingDir openWorkingDir = new OpenWorkingDir();
+        getActionMap().put(OPEN_WORKING_DIR_ACTION, openWorkingDir.toAction(sessions));
+
+        OpenLogs openLogs = new OpenLogs();
+        getActionMap().put(OPEN_LOGS_ACTION, openLogs.toAction(sessions));
 
         sessions.setModel(sessionModel);
         sessions.setDefaultRenderer(SwingWorker.StateValue.class, JTables.cellRendererOf(Renderers::renderState));
@@ -59,14 +70,11 @@ public class SessionsPanel extends javax.swing.JPanel {
         JTables.setWidthAsPercentages(sessions, .10, .15, .15, .60);
     }
 
-    public void add(Session session) {
-        sessionModel.add(session);
-    }
-
     private JMenu getSessionsMenu() {
+        ActionMap am = getActionMap();
         JMenu result = new JMenu();
-        result.add(openWorkingDir.toAction(sessions)).setText("Open user dir location");
-        result.add(openLogs.toAction(sessions)).setText("Open logs location");
+        result.add(am.get(OPEN_WORKING_DIR_ACTION)).setText("Open user dir location");
+        result.add(am.get(OPEN_LOGS_ACTION)).setText("Open logs location");
         return result;
     }
 
@@ -120,10 +128,9 @@ public class SessionsPanel extends javax.swing.JPanel {
     private javax.swing.JTable sessions;
     // End of variables declaration//GEN-END:variables
 
-    @lombok.RequiredArgsConstructor
     private static final class OpenWorkingDir extends JCommand<JTable> {
 
-        private final Desktop desktop;
+        private final Desktop desktop = DesktopManager.get();
 
         @Override
         public void execute(JTable c) throws Exception {
@@ -142,10 +149,9 @@ public class SessionsPanel extends javax.swing.JPanel {
         }
     }
 
-    @lombok.RequiredArgsConstructor
     private static final class OpenLogs extends JCommand<JTable> {
 
-        private final Desktop desktop;
+        private final Desktop desktop = DesktopManager.get();
 
         @Override
         public void execute(JTable c) throws Exception {
@@ -161,6 +167,77 @@ public class SessionsPanel extends javax.swing.JPanel {
         @Override
         public JCommand.ActionAdapter toAction(JTable c) {
             return super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
+        }
+    }
+
+    private static final class SessionTableModel extends AbstractTableModel {
+
+        private final List<Session> list = new ArrayList<>();
+
+        public void add(Session session) {
+            list.add(session);
+            session.addPropertyChangeListener(o -> fireTableDataChanged());
+            fireTableDataChanged();
+        }
+
+        public Session getRow(int rowIndex) {
+            return list.get(rowIndex);
+        }
+
+        @Override
+        public int getRowCount() {
+            return list.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 4;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Session session = getRow(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return session.getState();
+                case 1:
+                    return session.getScenario().getApp();
+                case 2:
+                    return session.getScenario().getConfig();
+                case 3:
+                    return session.getWorkingDir();
+            }
+            return null;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            switch (column) {
+                case 0:
+                    return "State";
+                case 1:
+                    return "App";
+                case 2:
+                    return "Config";
+                case 3:
+                    return "User dir";
+            }
+            return super.getColumnName(column);
+        }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            switch (columnIndex) {
+                case 0:
+                    return SwingWorker.StateValue.class;
+                case 1:
+                    return App.class;
+                case 2:
+                    return Config.class;
+                case 3:
+                    return File.class;
+            }
+            return super.getColumnClass(columnIndex);
         }
     }
 }

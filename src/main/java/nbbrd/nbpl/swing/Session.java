@@ -16,7 +16,7 @@
  */
 package nbbrd.nbpl.swing;
 
-import nbbrd.nbpl.core.Job;
+import nbbrd.nbpl.core.Scenario;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -30,7 +30,7 @@ import javax.swing.SwingWorker;
 public class Session {
 
     @lombok.Getter
-    private final Job job;
+    private final Scenario scenario;
 
     @lombok.Getter
     private final File workingDir;
@@ -38,15 +38,15 @@ public class Session {
     private final PropertyChangeSupport propertyChangeSupport;
     private final SwingWorker<Void, Void> worker;
 
-    public Session(Job job, File workingDir) {
-        this.job = job;
+    public Session(Scenario scenario, File workingDir) {
+        this.scenario = scenario;
         this.workingDir = workingDir;
         this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.worker = new SwingWorker() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    job.launch(workingDir);
+                    scenario.launch(workingDir);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -74,7 +74,7 @@ public class Session {
         propertyChangeSupport.addPropertyChangeListener(listener);
     }
 
-    public static Session of(Job job) throws IOException {
+    public static Session of(Scenario job) throws IOException {
         return new Session(job, job.init());
     }
 }

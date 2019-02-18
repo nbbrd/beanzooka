@@ -26,18 +26,14 @@ import java.util.List;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class Job {
+public class Scenario {
 
-    @lombok.Getter
     private App app;
 
-    @lombok.Getter
     private Config config;
 
-    @lombok.Getter
     private UserDir userDir;
 
-    @lombok.Getter
     private List<Plugin> plugins;
 
     public File init() throws IOException {

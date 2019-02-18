@@ -16,15 +16,14 @@
  */
 package nbbrd.nbpl.swing;
 
-import nbbrd.nbpl.core.Settings;
-import nbbrd.nbpl.core.SettingsParser;
+import nbbrd.nbpl.core.Resources;
+import nbbrd.nbpl.io.XmlResources;
 import ec.util.various.swing.BasicSwingLauncher;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.beans.BeanInfo;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -49,7 +48,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
     public static void main(String args[]) {
         new BasicSwingLauncher()
                 .content(NetBeansLauncher.class)
-                .title("NetBeans Platform launcher")
+                .title("NetBeans Platform Launcher")
                 .icons(() -> FontAwesome.FA_ROCKET.getImages(Color.DARK_GRAY, 16f, 32f, 64f))
                 .size(600, 400)
                 .launch();
@@ -76,7 +75,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
             Action action = toAction(c);
 
             button.setAction(action);
-            button.setIcon(FontAwesomeUtils.getIcon(icon, BeanInfo.ICON_MONO_16x16));
+            button.setIcon(icon.getIcon(Color.DARK_GRAY, 14f));
             button.setToolTipText(toolTip + " (" + key + ")");
 
             String id = getClass().getName();
@@ -112,7 +111,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
-            c.settings.setSettings(null);
+            c.resources.setResources(null);
         }
     }
 
@@ -144,8 +143,8 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(c)) {
-                Settings settings = SettingsParser.parse(fileChooser.getSelectedFile().toPath());
-                c.settings.setSettings(settings);
+                Resources resources = XmlResources.parse(fileChooser.getSelectedFile().toPath());
+                c.resources.setResources(resources);
                 storeCurrentDir();
             }
         }
@@ -167,19 +166,19 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
-            Session session = Session.of(c.settings.getJob());
+            Session session = Session.of(c.resources.getScenario());
             c.sessions.add(session);
             session.execute();
         }
 
         @Override
         public boolean isEnabled(NetBeansLauncher c) {
-            return c.settings.getJob() != null;
+            return c.resources.getScenario() != null;
         }
 
         @Override
         public ActionAdapter toAction(NetBeansLauncher c) {
-            return super.toAction(c).withWeakPropertyChangeListener(c.settings, SettingsPanel.JOB_PROPERTY);
+            return super.toAction(c).withWeakPropertyChangeListener(c.resources, ResourcesPanel.SCENARIO_PROPERTY);
         }
     }
 
@@ -198,7 +197,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         saveAsButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         launchButton = new javax.swing.JButton();
-        settings = new nbbrd.nbpl.swing.SettingsPanel();
+        resources = new nbbrd.nbpl.swing.ResourcesPanel();
         sessions = new nbbrd.nbpl.swing.SessionsPanel();
 
         setPreferredSize(new java.awt.Dimension(600, 400));
@@ -244,7 +243,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(settings, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
+                    .addComponent(resources, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -252,7 +251,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(settings, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(resources, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
                 .addContainerGap())
@@ -266,8 +265,8 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
     private javax.swing.JButton launchButton;
     private javax.swing.JButton newButton;
     private javax.swing.JButton openButton;
+    private nbbrd.nbpl.swing.ResourcesPanel resources;
     private javax.swing.JButton saveAsButton;
     private nbbrd.nbpl.swing.SessionsPanel sessions;
-    private nbbrd.nbpl.swing.SettingsPanel settings;
     // End of variables declaration//GEN-END:variables
 }

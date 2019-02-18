@@ -24,7 +24,7 @@ import java.io.File;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class App implements HasLabel {
+public class App {
 
     @lombok.NonNull
     private String label;

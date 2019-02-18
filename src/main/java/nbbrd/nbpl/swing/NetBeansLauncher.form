@@ -26,7 +26,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="sessions" max="32767" attributes="0"/>
-                  <Component id="settings" pref="580" max="32767" attributes="0"/>
+                  <Component id="resources" pref="580" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -37,7 +37,7 @@
           <Group type="102" alignment="0" attributes="0">
               <Component id="jToolBar1" min="-2" pref="25" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="settings" min="-2" pref="149" max="-2" attributes="0"/>
+              <Component id="resources" min="-2" pref="149" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="sessions" pref="203" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -94,7 +94,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="nbbrd.nbpl.swing.SettingsPanel" name="settings">
+    <Component class="nbbrd.nbpl.swing.ResourcesPanel" name="resources">
     </Component>
     <Component class="nbbrd.nbpl.swing.SessionsPanel" name="sessions">
     </Component>

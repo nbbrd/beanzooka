@@ -16,11 +16,25 @@
  */
 package nbbrd.nbpl.core;
 
+import java.util.List;
+
 /**
  *
  * @author Philippe Charles
  */
-public interface HasLabel {
+@lombok.Value
+@lombok.Builder(builderClassName = "Builder")
+public class Resources {
 
-    String getLabel();
+    @lombok.Singular
+    private List<Config> configs;
+
+    @lombok.Singular
+    private List<App> apps;
+
+    @lombok.Singular
+    private List<UserDir> userDirs;
+
+    @lombok.Singular
+    private List<Plugin> plugins;
 }

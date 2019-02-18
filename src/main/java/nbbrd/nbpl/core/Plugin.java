@@ -27,7 +27,7 @@ import java.nio.file.FileSystems;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class Plugin implements HasLabel {
+public class Plugin {
 
     @lombok.NonNull
     private String label;

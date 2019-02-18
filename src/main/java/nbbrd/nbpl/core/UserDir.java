@@ -26,7 +26,7 @@ import java.nio.file.Files;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class UserDir implements HasLabel {
+public class UserDir {
 
     public static final UserDir TEMP = UserDir.builder().label("---").folder(new File("")).build();
 

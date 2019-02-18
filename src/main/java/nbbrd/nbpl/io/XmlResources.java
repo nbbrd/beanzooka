@@ -14,37 +14,45 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package nbbrd.nbpl.io;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import nbbrd.nbpl.core.App;
+import nbbrd.nbpl.core.Config;
+import nbbrd.nbpl.core.Plugin;
+import nbbrd.nbpl.core.Resources;
+import nbbrd.nbpl.core.UserDir;
 
 /**
  *
  * @author Philippe Charles
  */
-public class SettingsParser {
+@lombok.experimental.UtilityClass
+public class XmlResources {
 
-    public static Settings parse(Path file) throws IOException, XMLStreamException {
+    @Nonnull
+    public Resources parse(@Nonnull Path file) throws IOException, XMLStreamException {
         XMLInputFactory factory = XMLInputFactory.newFactory();
         try (Reader reader = Files.newBufferedReader(file)) {
             XMLStreamReader xml = factory.createXMLStreamReader(reader);
             try {
-                return parseSettings(xml);
+                return parseResources(xml);
             } finally {
                 xml.close();
             }
         }
     }
 
-    private static Settings parseSettings(XMLStreamReader xml) throws XMLStreamException {
-        Settings.Builder result = Settings.builder();
+    private Resources parseResources(XMLStreamReader xml) throws XMLStreamException {
+        Resources.Builder result = Resources.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {
                 case XMLStreamReader.START_ELEMENT:
@@ -68,7 +76,7 @@ public class SettingsParser {
         return result.build();
     }
 
-    private static Config parseConfig(XMLStreamReader xml) throws XMLStreamException {
+    private Config parseConfig(XMLStreamReader xml) throws XMLStreamException {
         Config.Builder result = Config.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {
@@ -98,7 +106,7 @@ public class SettingsParser {
         throw new RuntimeException();
     }
 
-    private static App parseApp(XMLStreamReader xml) throws XMLStreamException {
+    private App parseApp(XMLStreamReader xml) throws XMLStreamException {
         App.Builder result = App.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {
@@ -122,7 +130,7 @@ public class SettingsParser {
         throw new RuntimeException();
     }
 
-    private static UserDir parseUserDir(XMLStreamReader xml) throws XMLStreamException {
+    private UserDir parseUserDir(XMLStreamReader xml) throws XMLStreamException {
         UserDir.Builder result = UserDir.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {
@@ -149,7 +157,7 @@ public class SettingsParser {
         throw new RuntimeException();
     }
 
-    private static Plugin parsePlugin(XMLStreamReader xml) throws XMLStreamException {
+    private Plugin parsePlugin(XMLStreamReader xml) throws XMLStreamException {
         Plugin.Builder result = Plugin.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {

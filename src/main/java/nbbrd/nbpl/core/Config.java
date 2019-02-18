@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class Config implements HasLabel {
+public class Config {
 
     @lombok.NonNull
     private String label;
