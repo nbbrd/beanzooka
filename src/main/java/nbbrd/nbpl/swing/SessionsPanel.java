@@ -16,13 +16,15 @@
  */
 package nbbrd.nbpl.swing;
 
-import ec.util.desktop.Desktop;
-import ec.util.desktop.DesktopManager;
+import ec.util.grid.swing.XTable;
+import internal.swing.SwingUtil;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.JCommand;
+import internal.swing.ShowInFolderCommand;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.swing.ActionMap;
 import javax.swing.JMenu;
 import javax.swing.JTable;
@@ -60,6 +62,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
         OpenLogs openLogs = new OpenLogs();
         getActionMap().put(OPEN_LOGS_ACTION, openLogs.toAction(sessions));
 
+        ((XTable) sessions).setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
         sessions.setModel(sessionModel);
         sessions.setDefaultRenderer(SwingWorker.StateValue.class, JTables.cellRendererOf(Renderers::renderState));
         sessions.setDefaultRenderer(App.class, JTables.cellRendererOf(Renderers::renderApp));
@@ -89,7 +92,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
 
         jLabel3 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        sessions = new javax.swing.JTable();
+        sessions = new ec.util.grid.swing.XTable();
 
         jLabel3.setText("Sessions:");
 
@@ -128,45 +131,35 @@ public final class SessionsPanel extends javax.swing.JPanel {
     private javax.swing.JTable sessions;
     // End of variables declaration//GEN-END:variables
 
-    private static final class OpenWorkingDir extends JCommand<JTable> {
-
-        private final Desktop desktop = DesktopManager.get();
+    private static final class OpenWorkingDir extends ShowInFolderCommand<JTable> {
 
         @Override
-        public void execute(JTable c) throws Exception {
-            Session session = ((SessionTableModel) c.getModel()).getRow(c.getSelectedRow());
-            desktop.showInFolder(session.getWorkingDir());
-        }
-
-        @Override
-        public boolean isEnabled(JTable c) {
-            return c.getSelectedRowCount() == 1 && desktop.isSupported(Desktop.Action.SHOW_IN_FOLDER);
+        protected Optional<File> getFile(JTable c) {
+            return c.getSelectedRowCount() == 1
+                    ? Optional.of(((SessionTableModel) c.getModel()).getRow(c.getSelectedRow()).getWorkingDir())
+                    : Optional.empty();
         }
 
         @Override
         public JCommand.ActionAdapter toAction(JTable c) {
-            return super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
+            return super.toAction(c)
+                    .withWeakListSelectionListener(c.getSelectionModel());
         }
     }
 
-    private static final class OpenLogs extends JCommand<JTable> {
-
-        private final Desktop desktop = DesktopManager.get();
+    private static final class OpenLogs extends ShowInFolderCommand<JTable> {
 
         @Override
-        public void execute(JTable c) throws Exception {
-            Session session = ((SessionTableModel) c.getModel()).getRow(c.getSelectedRow());
-            desktop.showInFolder(UserDir.resolveLogFile(session.getWorkingDir()));
-        }
-
-        @Override
-        public boolean isEnabled(JTable c) {
-            return c.getSelectedRowCount() == 1 && desktop.isSupported(Desktop.Action.SHOW_IN_FOLDER);
+        protected Optional<File> getFile(JTable c) {
+            return c.getSelectedRowCount() == 1
+                    ? Optional.of(((SessionTableModel) c.getModel()).getRow(c.getSelectedRow()).getWorkingDir()).map(UserDir::resolveLogFile)
+                    : Optional.empty();
         }
 
         @Override
         public JCommand.ActionAdapter toAction(JTable c) {
-            return super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
+            return super.toAction(c)
+                    .withWeakListSelectionListener(c.getSelectionModel());
         }
     }
 

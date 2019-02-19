@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
+@lombok.experimental.Wither
 public class Config {
 
     @lombok.NonNull

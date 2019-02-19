@@ -52,6 +52,9 @@
               <Table columnCount="0" rowCount="0"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ec.util.grid.swing.XTable()"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

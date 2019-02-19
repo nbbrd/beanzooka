@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 National Bank of Belgium
+ * Copyright 2019 National Bank of Belgium
  * 
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,31 +14,25 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package internal.swing;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.util.List;
+import javax.swing.ListModel;
 
 /**
  *
  * @author Philippe Charles
+ * @param <E>
  */
-@lombok.Value
-@lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
-public class Plugin {
+public interface ListModel2<E> extends ListModel<E>, List<E> {
 
-    @lombok.NonNull
-    private String label;
+    @Override
+    default int getSize() {
+        return size();
+    }
 
-    @lombok.NonNull
-    private File file;
-
-    public void extract(File folder) throws IOException {
-        try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
-            Util.copyAll(fs.getPath("/netbeans"), folder.toPath());
-        }
+    @Override
+    default E getElementAt(int index) {
+        return get(index);
     }
 }

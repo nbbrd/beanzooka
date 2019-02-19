@@ -23,7 +23,8 @@ import java.io.File;
  * @author Philippe Charles
  */
 @lombok.Value
-@lombok.Builder(builderClassName = "Builder")
+@lombok.Builder(builderClassName = "Builder", toBuilder = true)
+@lombok.experimental.Wither
 public class App {
 
     @lombok.NonNull

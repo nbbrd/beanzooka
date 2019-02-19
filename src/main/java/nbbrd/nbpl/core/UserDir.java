@@ -26,6 +26,7 @@ import java.nio.file.Files;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
+@lombok.experimental.Wither
 public class UserDir {
 
     public static final UserDir TEMP = UserDir.builder().label("---").folder(new File("")).build();

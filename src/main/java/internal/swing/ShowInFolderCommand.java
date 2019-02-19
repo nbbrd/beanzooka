@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 National Bank of Belgium
+ * Copyright 2019 National Bank of Belgium
  * 
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,31 +14,32 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package internal.swing;
 
+import ec.util.desktop.Desktop;
+import ec.util.desktop.DesktopManager;
+import ec.util.various.swing.JCommand;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.util.Optional;
 
 /**
  *
  * @author Philippe Charles
  */
-@lombok.Value
-@lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
-public class Plugin {
+public abstract class ShowInFolderCommand<T> extends JCommand<T> {
 
-    @lombok.NonNull
-    private String label;
+    private final Desktop desktop = DesktopManager.get();
 
-    @lombok.NonNull
-    private File file;
-
-    public void extract(File folder) throws IOException {
-        try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
-            Util.copyAll(fs.getPath("/netbeans"), folder.toPath());
-        }
+    @Override
+    public boolean isEnabled(T component) {
+        return desktop.isSupported(Desktop.Action.SHOW_IN_FOLDER)
+                && getFile(component).filter(File::exists).isPresent();
     }
+
+    @Override
+    public void execute(T component) throws Exception {
+        desktop.showInFolder(getFile(component).get());
+    }
+
+    abstract protected Optional<File> getFile(T component);
 }

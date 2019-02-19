@@ -21,13 +21,12 @@ import nbbrd.nbpl.io.XmlResources;
 import ec.util.various.swing.BasicSwingLauncher;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
+import internal.swing.PersistantFileChooser;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.prefs.Preferences;
 import javax.swing.Action;
 import javax.swing.JButton;
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
@@ -117,27 +116,11 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
     private static final class OpenCmd extends CustomCommand {
 
-        private final static String LAST_USED_FILE = "lastUsedFile";
-
-        private final Preferences prefs;
         private final JFileChooser fileChooser;
 
         private OpenCmd() {
-            this.prefs = Preferences.userNodeForPackage(NetBeansLauncher.class);
-            this.fileChooser = new JFileChooser();
+            this.fileChooser = new PersistantFileChooser(NetBeansLauncher.class);
             fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
-            loadCurrentDir();
-        }
-
-        private void loadCurrentDir() {
-            String dir = prefs.get(LAST_USED_FILE, null);
-            if (dir != null) {
-                fileChooser.setCurrentDirectory(new File(dir));
-            }
-        }
-
-        private void storeCurrentDir() {
-            prefs.put(LAST_USED_FILE, fileChooser.getCurrentDirectory().toString());
         }
 
         @Override
@@ -145,7 +128,6 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(c)) {
                 Resources resources = XmlResources.parse(fileChooser.getSelectedFile().toPath());
                 c.resources.setResources(resources);
-                storeCurrentDir();
             }
         }
     }

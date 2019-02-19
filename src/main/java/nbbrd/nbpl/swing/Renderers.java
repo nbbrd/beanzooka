@@ -16,10 +16,16 @@
  */
 package nbbrd.nbpl.swing;
 
+import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
+import internal.swing.FileCellEditor;
+import internal.swing.PersistantFileChooser;
+import internal.swing.TableColumnDescriptor;
+import internal.swing.TextCellEditor;
 import java.awt.Color;
 import java.io.File;
-import java.util.function.Function;
+import java.util.UUID;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 import nbbrd.nbpl.core.App;
@@ -34,29 +40,62 @@ import nbbrd.nbpl.core.UserDir;
 @lombok.experimental.UtilityClass
 class Renderers {
 
+    static final TableColumnDescriptor LABEL_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderLabel))
+                    .preferedWidth(100)
+                    .build();
+
+    static final TableColumnDescriptor TEXT_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
+                    .cellEditor(TextCellEditor::new)
+                    .build();
+
+    static final TableColumnDescriptor FILE_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
+                    .cellEditor(FileCellEditor::new)
+                    .preferedWidth(300)
+                    .build();
+
+    static final TableColumnDescriptor FOLDER_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
+                    .cellEditor(FileCellEditor::new)
+                    .build();
+
     void renderApp(JLabel label, App value) {
-        setText(label, value, App::getLabel);
         if (value != null) {
+            label.setText(value.getLabel());
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
         }
     }
 
     void renderConfig(JLabel label, Config value) {
-        setText(label, value, Config::getLabel);
         if (value != null) {
+            label.setText(value.getLabel());
             label.setToolTipText(value.getJavaFile().toString());
             setIfInvalidFile(label, value.getJavaFile());
         }
     }
 
     void renderUserDir(JLabel label, UserDir value) {
-        setText(label, value, UserDir::getLabel);
         if (value != null) {
+            label.setText(value.getLabel());
             label.setToolTipText(value.getFolder().toString());
             if (value.isClone()) {
                 setIfInvalidFolder(label, value.getFolder());
             }
+        }
+    }
+
+    void renderFile(JLabel label, File value) {
+        if (value != null) {
+            label.setText(value.getPath());
+            label.setToolTipText(value.toString());
+            setIfInvalidFile(label, value);
         }
     }
 
@@ -69,8 +108,8 @@ class Renderers {
     }
 
     void renderPlugin(JLabel label, Plugin value) {
-        setText(label, value, Plugin::getLabel);
         if (value != null) {
+            label.setText(value.getLabel());
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
         }
@@ -80,9 +119,17 @@ class Renderers {
         label.setText(value.name());
     }
 
-    private <T> void setText(JLabel label, T value, Function<T, String> toLabel) {
+    void renderLabel(JLabel label, String value) {
         if (value != null) {
-            label.setText(toLabel.apply(value));
+            label.setText(value);
+            label.setToolTipText(value);
+        }
+    }
+
+    void renderText(JLabel label, String value) {
+        if (value != null) {
+            label.setText(value);
+            label.setToolTipText(value);
         }
     }
 
@@ -100,5 +147,46 @@ class Renderers {
         } else {
             label.setIcon(null);
         }
+    }
+
+    private File openFile(Class<?> id) {
+        JFileChooser fileChooser = new PersistantFileChooser(id);
+        return fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION
+                ? fileChooser.getSelectedFile()
+                : null;
+    }
+
+    private final File EMPTY_FILE = new File("");
+
+    private String randomLabel() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    public App newApp() {
+        File file = openFile(App.class);
+        return file != null
+                ? App.builder().label(file.getName()).file(file).build()
+                : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
+    }
+
+    public Config newConfig() {
+        File file = openFile(Config.class);
+        return file != null
+                ? Config.builder().label(file.getName()).javaFile(file).build()
+                : Config.builder().label(randomLabel()).javaFile(EMPTY_FILE).build();
+    }
+
+    public UserDir newUserDir() {
+        File file = openFile(UserDir.class);
+        return file != null
+                ? UserDir.builder().label(file.getName()).folder(file).build()
+                : UserDir.builder().label(randomLabel()).folder(EMPTY_FILE).build();
+    }
+
+    public Plugin newPlugin() {
+        File file = openFile(Plugin.class);
+        return file != null
+                ? Plugin.builder().label(file.getName()).file(file).build()
+                : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 }
