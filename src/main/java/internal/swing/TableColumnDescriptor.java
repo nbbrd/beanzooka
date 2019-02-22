@@ -32,6 +32,8 @@ import javax.swing.table.TableColumnModel;
 @lombok.Builder(builderClassName = "Builder")
 public final class TableColumnDescriptor {
 
+    public static final TableColumnDescriptor EMPTY = builder().build();
+    
     private final Supplier<TableCellRenderer> cellRenderer;
     private final Supplier<TableCellEditor> cellEditor;
     private final int preferedWidth;

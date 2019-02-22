@@ -19,6 +19,7 @@ package nbbrd.nbpl.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -32,12 +33,12 @@ public class Configuration {
 
     private Jdk jdk;
 
-    private UserDir userDir;
+    private Optional<UserDir> userDir;
 
     private List<Plugin> plugins;
 
     public File init() throws IOException {
-        File workingDir = userDir.createWorkingDir();
+        File workingDir = userDir.orElse(UserDir.TEMP).createWorkingDir();
 
         jdk.writeConfigFile(UserDir.resolveConfigFile(workingDir, app.getBranding()));
 

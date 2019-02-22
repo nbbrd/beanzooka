@@ -68,6 +68,7 @@ public final class FileCellEditor extends DefaultCellEditor {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                 if (fileChooser.showOpenDialog(getComponent()) == JFileChooser.APPROVE_OPTION) {
                     ((JTextField) FileCellEditor.super.getComponent()).setText(fileChooser.getSelectedFile().toString());
                 };

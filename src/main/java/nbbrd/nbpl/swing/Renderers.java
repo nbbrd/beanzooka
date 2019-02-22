@@ -158,6 +158,7 @@ class Renderers {
 
     private File openFile(Class<?> id) {
         JFileChooser fileChooser = new PersistantFileChooser(id);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         return fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION
                 ? fileChooser.getSelectedFile()
                 : null;

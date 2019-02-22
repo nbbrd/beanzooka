@@ -22,6 +22,7 @@ import ec.util.various.swing.JCommand;
 import internal.swing.ListTableEdition;
 import internal.swing.EventShield;
 import internal.swing.ShowInFolderCommand;
+import internal.swing.TableColumnDescriptor;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -116,6 +117,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         plugins.setComponentPopupMenu(getPopupMenu(EDIT_PLUGINS_ACTION, OPEN_PLUGIN_ACTION));
         SwingUtil.addListDataListener(plugins, SwingUtil.listDataListenerOf(this::onPluginsDataChange));
 
+        tempUserDir.addPropertyChangeListener("BUTTON.BP_CHECKBOX", event -> updateConfiguration());
+
         addPropertyChangeListener(RESOURCES_PROPERTY, shield.wrap(this::onResourcesChange));
         addPropertyChangeListener(CONFIGURATION_PROPERTY, shield.wrap(this::onConfigurationChange));
     }
@@ -164,7 +167,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         if (resources != null) {
             apps.setModel(SwingUtil.modelOf(resources.getApps()));
             jdks.setModel(SwingUtil.modelOf(resources.getJdks()));
-            userDirs.setModel(SwingUtil.modelOf(SwingUtil.concat(UserDir.TEMP, resources.getUserDirs())));
+            userDirs.setModel(SwingUtil.modelOf(resources.getUserDirs()));
             plugins.setModel(SwingUtil.modelOf(resources.getPlugins()));
         } else {
             apps.setModel(new DefaultComboBoxModel());
@@ -198,7 +201,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                             .builder()
                             .app((App) apps.getSelectedItem())
                             .jdk((Jdk) jdks.getSelectedItem())
-                            .userDir((UserDir) userDirs.getSelectedItem())
+                            .userDir(tempUserDir.isSelected() ? Optional.empty() : Optional.of((UserDir) userDirs.getSelectedItem()))
                             .plugins(plugins.getSelectedValuesList())
                             .build())
             );
@@ -244,10 +247,11 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
     private static final ListTableEdition<UserDir> USER_DIRS
             = ListTableEdition.<UserDir>builder()
-                    .name("Edit userdirs")
+                    .name("Edit user dirs")
                     .valueFactory(Renderers::newUserDir)
                     .column("Label", String.class, UserDir::getLabel, UserDir::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("Folder", File.class, UserDir::getFolder, UserDir::withFolder, Renderers.FOLDER_DESCRIPTOR)
+                    .column("Clone", Boolean.class, UserDir::isClone, UserDir::withClone, TableColumnDescriptor.EMPTY)
                     .build();
 
     private static final ListTableEdition<Plugin> PLUGINS
@@ -267,7 +271,6 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel4 = new javax.swing.JLabel();
         userDirs = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         plugins = new javax.swing.JList<>();
@@ -276,8 +279,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         jLabel5 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jdks = new javax.swing.JComboBox<>();
-
-        jLabel4.setText("User dir:");
+        tempUserDir = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
 
         jScrollPane1.setViewportView(plugins);
 
@@ -287,6 +290,13 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
         jLabel2.setText("JDK:");
 
+        tempUserDir.setSelected(true);
+        tempUserDir.setText("temp");
+        tempUserDir.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        tempUserDir.setMargin(new java.awt.Insets(0, 0, 0, 0));
+
+        jLabel3.setText("User dir:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -295,13 +305,16 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel4)
-                    .addComponent(apps, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
+                        .addComponent(tempUserDir))
+                    .addComponent(userDirs, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jdks, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(userDirs, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(apps, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE))))
@@ -313,7 +326,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                     .addComponent(jLabel1)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(apps, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -321,10 +335,11 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jdks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(tempUserDir))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(userDirs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(userDirs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -333,11 +348,12 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox<App> apps;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<nbbrd.nbpl.core.Jdk> jdks;
     private javax.swing.JList<Plugin> plugins;
+    private javax.swing.JCheckBox tempUserDir;
     private javax.swing.JComboBox<UserDir> userDirs;
     // End of variables declaration//GEN-END:variables
 }

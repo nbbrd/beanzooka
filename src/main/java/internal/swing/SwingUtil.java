@@ -22,7 +22,6 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -56,12 +55,6 @@ public class SwingUtil {
                 }
             }
         });
-    }
-
-    public <X> List<X> concat(X element, List<X> list) {
-        List<X> result = new ArrayList<>(list);
-        result.add(0, element);
-        return result;
     }
 
     public <E> ComboBoxModel<E> modelOf(List<E> list) {
