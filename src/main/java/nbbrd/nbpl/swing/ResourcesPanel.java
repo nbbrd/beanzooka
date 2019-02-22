@@ -25,6 +25,7 @@ import internal.swing.ShowInFolderCommand;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.swing.Action;
@@ -32,6 +33,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListSelectionEvent;
 import nbbrd.nbpl.core.App;
 import nbbrd.nbpl.core.Jdk;
@@ -57,10 +59,12 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
     private final EventShield shield;
     private Resources resources;
-    private Configuration configuration;
+    private Optional<Configuration> configuration;
 
     public ResourcesPanel() {
         this.shield = new EventShield();
+        this.resources = Resources.builder().build();
+        this.configuration = Optional.empty();
         initComponents();
         initComponents2();
     }
@@ -70,14 +74,16 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     }
 
     public void setResources(Resources resources) {
+        Objects.requireNonNull(resources);
         firePropertyChange(RESOURCES_PROPERTY, this.resources, this.resources = resources);
     }
 
-    public Configuration getConfiguration() {
+    public Optional<Configuration> getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(Configuration configuration) {
+    public void setConfiguration(Optional<Configuration> configuration) {
+        Objects.requireNonNull(configuration);
         firePropertyChange(CONFIGURATION_PROPERTY, this.configuration, this.configuration = configuration);
     }
 
@@ -91,20 +97,24 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         getActionMap().put(EDIT_PLUGINS_ACTION, PLUGINS.toAction(ListTableEdition.Bridge.list(), plugins));
 
         apps.setRenderer(JLists.cellRendererOf(Renderers::renderApp));
-        apps.addItemListener(shield.wrap(this::onAppsChange));
+        apps.addItemListener(shield.wrap(this::onAppsSelectionChange));
         apps.setComponentPopupMenu(getPopupMenu(EDIT_APPS_ACTION));
+        SwingUtil.addListDataListener(apps, SwingUtil.listDataListenerOf(this::onAppsDataChange));
 
         jdks.setRenderer(JLists.cellRendererOf(Renderers::renderJdk));
-        jdks.addItemListener(shield.wrap(this::onJdkChange));
+        jdks.addItemListener(shield.wrap(this::onJdksSelectionChange));
         jdks.setComponentPopupMenu(getPopupMenu(EDIT_JDKS_ACTION));
+        SwingUtil.addListDataListener(jdks, SwingUtil.listDataListenerOf(this::onJdksDataChange));
 
         userDirs.setRenderer(JLists.cellRendererOf(Renderers::renderUserDir));
-        userDirs.addItemListener(shield.wrap(this::onUserDirsChange));
+        userDirs.addItemListener(shield.wrap(this::onUserDirsSelectionChange));
         userDirs.setComponentPopupMenu(getPopupMenu(EDIT_USER_DIRS_ACTION));
+        SwingUtil.addListDataListener(userDirs, SwingUtil.listDataListenerOf(this::onUserDirsDataChange));
 
         plugins.setCellRenderer(JLists.cellRendererOf(Renderers::renderPlugin));
-        plugins.addListSelectionListener(shield.wrap(this::onPluginsChange));
+        plugins.addListSelectionListener(shield.wrap(this::onPluginsSelectionChange));
         plugins.setComponentPopupMenu(getPopupMenu(EDIT_PLUGINS_ACTION, OPEN_PLUGIN_ACTION));
+        SwingUtil.addListDataListener(plugins, SwingUtil.listDataListenerOf(this::onPluginsDataChange));
 
         addPropertyChangeListener(RESOURCES_PROPERTY, shield.wrap(this::onResourcesChange));
         addPropertyChangeListener(CONFIGURATION_PROPERTY, shield.wrap(this::onConfigurationChange));
@@ -118,20 +128,36 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         return result.getPopupMenu();
     }
 
-    private void onAppsChange(ItemEvent event) {
+    private void onAppsSelectionChange(ItemEvent event) {
         updateConfiguration();
     }
 
-    private void onJdkChange(ItemEvent event) {
+    private void onAppsDataChange(ListDataEvent event) {
+        setResources(getResources().withApps(SwingUtil.listOf(apps.getModel())));
+    }
+
+    private void onJdksSelectionChange(ItemEvent event) {
         updateConfiguration();
     }
 
-    private void onUserDirsChange(ItemEvent event) {
+    private void onJdksDataChange(ListDataEvent event) {
+        setResources(getResources().withJdks(SwingUtil.listOf(jdks.getModel())));
+    }
+
+    private void onUserDirsSelectionChange(ItemEvent event) {
         updateConfiguration();
     }
 
-    private void onPluginsChange(ListSelectionEvent event) {
+    private void onUserDirsDataChange(ListDataEvent event) {
+        setResources(getResources().withUserDirs(SwingUtil.listOf(userDirs.getModel())));
+    }
+
+    private void onPluginsSelectionChange(ListSelectionEvent event) {
         updateConfiguration();
+    }
+
+    private void onPluginsDataChange(ListDataEvent event) {
+        setResources(getResources().withPlugins(SwingUtil.listOf(plugins.getModel())));
     }
 
     private void onResourcesChange(PropertyChangeEvent event) {
@@ -150,10 +176,10 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     }
 
     private void onConfigurationChange(PropertyChangeEvent event) {
-        if (configuration != null) {
-            apps.setSelectedItem(configuration.getApp());
-            jdks.setSelectedItem(configuration.getJdk());
-            userDirs.setSelectedItem(configuration.getUserDir());
+        if (configuration.isPresent()) {
+            apps.setSelectedItem(configuration.get().getApp());
+            jdks.setSelectedItem(configuration.get().getJdk());
+            userDirs.setSelectedItem(configuration.get().getUserDir());
 //        plugins.setSelectedIndices(job.getPlugins().stream().mapToInt(plugins.get));
         } else {
             apps.setSelectedItem(null);
@@ -167,15 +193,17 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         if (apps.getSelectedIndex() != -1
                 && jdks.getSelectedIndex() != -1
                 && userDirs.getSelectedIndex() != -1) {
-            setConfiguration(Configuration
-                    .builder()
-                    .app((App) apps.getSelectedItem())
-                    .jdk((Jdk) jdks.getSelectedItem())
-                    .userDir((UserDir) userDirs.getSelectedItem())
-                    .plugins(plugins.getSelectedValuesList())
-                    .build());
+            setConfiguration(Optional.of(
+                    Configuration
+                            .builder()
+                            .app((App) apps.getSelectedItem())
+                            .jdk((Jdk) jdks.getSelectedItem())
+                            .userDir((UserDir) userDirs.getSelectedItem())
+                            .plugins(plugins.getSelectedValuesList())
+                            .build())
+            );
         } else {
-            setConfiguration(null);
+            setConfiguration(Optional.empty());
         }
     }
 

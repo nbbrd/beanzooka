@@ -24,6 +24,7 @@ import java.util.List;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
+@lombok.experimental.Wither
 public class Resources {
 
     @lombok.Singular

@@ -71,6 +71,8 @@ class Renderers {
             label.setText(value.getLabel());
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
+        } else {
+            label.setToolTipText(null);
         }
     }
 
@@ -79,6 +81,8 @@ class Renderers {
             label.setText(value.getLabel());
             label.setToolTipText(value.getJavaHome().toString());
             setIfInvalidFolder(label, value.getJavaHome());
+        } else {
+            label.setToolTipText(null);
         }
     }
 
@@ -89,6 +93,8 @@ class Renderers {
             if (value.isClone()) {
                 setIfInvalidFolder(label, value.getFolder());
             }
+        } else {
+            label.setToolTipText(null);
         }
     }
 
@@ -97,6 +103,8 @@ class Renderers {
             label.setText(value.getPath());
             label.setToolTipText(value.toString());
             setIfInvalidFile(label, value);
+        } else {
+            label.setToolTipText(null);
         }
     }
 
@@ -105,6 +113,8 @@ class Renderers {
             label.setText(value.getPath());
             label.setToolTipText(value.toString());
             setIfInvalidFolder(label, value);
+        } else {
+            label.setToolTipText(null);
         }
     }
 
@@ -121,17 +131,13 @@ class Renderers {
     }
 
     void renderLabel(JLabel label, String value) {
-        if (value != null) {
-            label.setText(value);
-            label.setToolTipText(value);
-        }
+        label.setText(value);
+        label.setToolTipText(value);
     }
 
     void renderText(JLabel label, String value) {
-        if (value != null) {
-            label.setText(value);
-            label.setToolTipText(value);
-        }
+        label.setText(value);
+        label.setToolTipText(value);
     }
 
     private void setIfInvalidFolder(JLabel label, File folder) {

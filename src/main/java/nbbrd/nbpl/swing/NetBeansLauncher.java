@@ -25,6 +25,7 @@ import internal.swing.PersistantFileChooser;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.swing.Action;
@@ -110,7 +111,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
-            c.resources.setResources(null);
+            c.resources.setResources(Resources.builder().build());
         }
     }
 
@@ -126,21 +127,30 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(c)) {
-                Resources resources = XmlResources.parse(fileChooser.getSelectedFile().toPath());
-                c.resources.setResources(resources);
+                c.resources.setResources(XmlResources.read(fileChooser.getSelectedFile().toPath()));
             }
         }
     }
 
     private static final class SaveAsCmd extends CustomCommand {
 
-        @Override
-        public void execute(NetBeansLauncher c) throws Exception {
+        private final JFileChooser fileChooser;
+
+        public SaveAsCmd() {
+            this.fileChooser = new PersistantFileChooser(NetBeansLauncher.class);
+            fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
         }
 
         @Override
-        public boolean isEnabled(NetBeansLauncher c) {
-            return false;
+        public void execute(NetBeansLauncher c) throws Exception {
+            if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(c)) {
+                File target = fileChooser.getSelectedFile();
+                if (target.exists()) {
+                    if (JOptionPane.showConfirmDialog(c, "File exists already. Delete it anyway?", "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        XmlResources.write(target.toPath(), c.resources.getResources());
+                    }
+                }
+            }
         }
     }
 
@@ -148,19 +158,20 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
-            Session session = Session.of(c.resources.getConfiguration());
+            Session session = Session.of(c.resources.getConfiguration().get());
             c.sessions.add(session);
             session.execute();
         }
 
         @Override
         public boolean isEnabled(NetBeansLauncher c) {
-            return c.resources.getConfiguration() != null;
+            return c.resources.getConfiguration().isPresent();
         }
 
         @Override
         public ActionAdapter toAction(NetBeansLauncher c) {
-            return super.toAction(c).withWeakPropertyChangeListener(c.resources, ResourcesPanel.CONFIGURATION_PROPERTY);
+            return super.toAction(c)
+                    .withWeakPropertyChangeListener(c.resources, ResourcesPanel.CONFIGURATION_PROPERTY);
         }
     }
 

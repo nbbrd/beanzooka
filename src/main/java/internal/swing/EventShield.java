@@ -18,6 +18,8 @@ package internal.swing;
 
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionListener;
 
 /**
@@ -54,6 +56,37 @@ public final class EventShield {
                 updating = true;
                 listener.valueChanged(event);
                 updating = false;
+            }
+        };
+    }
+
+    public ListDataListener wrap(ListDataListener listener) {
+        return new ListDataListener() {
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                if (!updating) {
+                    updating = true;
+                    listener.intervalAdded(e);
+                    updating = false;
+                }
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                if (!updating) {
+                    updating = true;
+                    listener.intervalRemoved(e);
+                    updating = false;
+                }
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                if (!updating) {
+                    updating = true;
+                    listener.contentsChanged(e);
+                    updating = false;
+                }
             }
         };
     }
