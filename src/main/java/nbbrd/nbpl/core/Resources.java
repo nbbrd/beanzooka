@@ -27,7 +27,7 @@ import java.util.List;
 public class Resources {
 
     @lombok.Singular
-    private List<Config> configs;
+    private List<Jdk> jdks;
 
     @lombok.Singular
     private List<App> apps;

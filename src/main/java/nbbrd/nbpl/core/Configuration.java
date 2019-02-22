@@ -26,11 +26,11 @@ import java.util.List;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class Scenario {
+public class Configuration {
 
     private App app;
 
-    private Config config;
+    private Jdk jdk;
 
     private UserDir userDir;
 
@@ -39,7 +39,7 @@ public class Scenario {
     public File init() throws IOException {
         File workingDir = userDir.createWorkingDir();
 
-        config.write(UserDir.resolveConfigFile(workingDir, app.getBranding()));
+        jdk.writeConfigFile(UserDir.resolveConfigFile(workingDir, app.getBranding()));
 
         for (Plugin plugin : plugins) {
             plugin.extract(workingDir);

@@ -33,23 +33,19 @@ import java.util.stream.Collectors;
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
 @lombok.experimental.Wither
-public class Config {
+public class Jdk {
 
     @lombok.NonNull
     private String label;
 
     @lombok.NonNull
-    private File javaFile;
+    private File javaHome;
 
     private String options;
 
     private String clusters;
 
-    public File getJavaHome() {
-        return javaFile.getParentFile().getParentFile();
-    }
-
-    public Map<String, String> getConfigMap() {
+    public Map<String, String> getConfigFileEntries() {
         Map<String, String> result = new HashMap<>();
         result.put("jdkhome", getJavaHome().getPath());
         if (getOptions() != null) {
@@ -61,12 +57,12 @@ public class Config {
         return result;
     }
 
-    public void write(File file) throws IOException {
+    public void writeConfigFile(File file) throws IOException {
         Path etc = file.toPath().getParent();
         if (!Files.exists(etc)) {
             Files.createDirectories(etc);
         }
-        List<String> content = getConfigMap()
+        List<String> content = getConfigFileEntries()
                 .entrySet()
                 .stream()
                 .map(o -> o.getKey() + "=\"" + o.getValue() + "\"")

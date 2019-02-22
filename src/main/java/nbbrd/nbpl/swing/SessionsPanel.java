@@ -31,7 +31,7 @@ import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Config;
+import nbbrd.nbpl.core.Jdk;
 import nbbrd.nbpl.core.UserDir;
 
 /**
@@ -66,7 +66,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
         sessions.setModel(sessionModel);
         sessions.setDefaultRenderer(SwingWorker.StateValue.class, JTables.cellRendererOf(Renderers::renderState));
         sessions.setDefaultRenderer(App.class, JTables.cellRendererOf(Renderers::renderApp));
-        sessions.setDefaultRenderer(Config.class, JTables.cellRendererOf(Renderers::renderConfig));
+        sessions.setDefaultRenderer(Jdk.class, JTables.cellRendererOf(Renderers::renderJdk));
         sessions.setDefaultRenderer(File.class, JTables.cellRendererOf(Renderers::renderFolder));
         sessions.setComponentPopupMenu(getSessionsMenu().getPopupMenu());
         SwingUtil.onDoubleClick(sessions, openWorkingDir);
@@ -194,9 +194,9 @@ public final class SessionsPanel extends javax.swing.JPanel {
                 case 0:
                     return session.getState();
                 case 1:
-                    return session.getScenario().getApp();
+                    return session.getConfiguration().getApp();
                 case 2:
-                    return session.getScenario().getConfig();
+                    return session.getConfiguration().getJdk();
                 case 3:
                     return session.getWorkingDir();
             }
@@ -211,7 +211,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
                 case 1:
                     return "App";
                 case 2:
-                    return "Config";
+                    return "Jdk";
                 case 3:
                     return "User dir";
             }
@@ -226,7 +226,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
                 case 1:
                     return App.class;
                 case 2:
-                    return Config.class;
+                    return Jdk.class;
                 case 3:
                     return File.class;
             }

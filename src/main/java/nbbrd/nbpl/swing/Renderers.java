@@ -29,7 +29,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Config;
+import nbbrd.nbpl.core.Jdk;
 import nbbrd.nbpl.core.Plugin;
 import nbbrd.nbpl.core.UserDir;
 
@@ -63,6 +63,7 @@ class Renderers {
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
                     .cellEditor(FileCellEditor::new)
+                    .preferedWidth(300)
                     .build();
 
     void renderApp(JLabel label, App value) {
@@ -73,11 +74,11 @@ class Renderers {
         }
     }
 
-    void renderConfig(JLabel label, Config value) {
+    void renderJdk(JLabel label, Jdk value) {
         if (value != null) {
             label.setText(value.getLabel());
-            label.setToolTipText(value.getJavaFile().toString());
-            setIfInvalidFile(label, value.getJavaFile());
+            label.setToolTipText(value.getJavaHome().toString());
+            setIfInvalidFolder(label, value.getJavaHome());
         }
     }
 
@@ -169,11 +170,11 @@ class Renderers {
                 : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
-    public Config newConfig() {
-        File file = openFile(Config.class);
+    public Jdk newJdk() {
+        File file = openFile(Jdk.class);
         return file != null
-                ? Config.builder().label(file.getName()).javaFile(file).build()
-                : Config.builder().label(randomLabel()).javaFile(EMPTY_FILE).build();
+                ? Jdk.builder().label(file.getName()).javaHome(file).build()
+                : Jdk.builder().label(randomLabel()).javaHome(EMPTY_FILE).build();
     }
 
     public UserDir newUserDir() {

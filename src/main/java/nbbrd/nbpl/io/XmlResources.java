@@ -26,7 +26,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Config;
+import nbbrd.nbpl.core.Jdk;
 import nbbrd.nbpl.core.Plugin;
 import nbbrd.nbpl.core.Resources;
 import nbbrd.nbpl.core.UserDir;
@@ -57,8 +57,8 @@ public class XmlResources {
             switch (xml.next()) {
                 case XMLStreamReader.START_ELEMENT:
                     switch (xml.getLocalName()) {
-                        case "config":
-                            result.config(parseConfig(xml));
+                        case "jdk":
+                            result.jdk(parseJdk(xml));
                             break;
                         case "app":
                             result.app(parseApp(xml));
@@ -76,8 +76,8 @@ public class XmlResources {
         return result.build();
     }
 
-    private Config parseConfig(XMLStreamReader xml) throws XMLStreamException {
-        Config.Builder result = Config.builder();
+    private Jdk parseJdk(XMLStreamReader xml) throws XMLStreamException {
+        Jdk.Builder result = Jdk.builder();
         while (xml.hasNext()) {
             switch (xml.next()) {
                 case XMLStreamReader.START_ELEMENT:
@@ -85,8 +85,8 @@ public class XmlResources {
                         case "label":
                             result.label(xml.getElementText());
                             break;
-                        case "javaFile":
-                            result.javaFile(new File(xml.getElementText()));
+                        case "javaHome":
+                            result.javaHome(new File(xml.getElementText()));
                             break;
                         case "options":
                             result.options(xml.getElementText());
@@ -97,7 +97,7 @@ public class XmlResources {
                     }
                     break;
                 case XMLStreamReader.END_ELEMENT:
-                    if (xml.getLocalName().equals("config")) {
+                    if (xml.getLocalName().equals("jdk")) {
                         return result.build();
                     }
                     break;

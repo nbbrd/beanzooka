@@ -148,19 +148,19 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
 
         @Override
         public void execute(NetBeansLauncher c) throws Exception {
-            Session session = Session.of(c.resources.getScenario());
+            Session session = Session.of(c.resources.getConfiguration());
             c.sessions.add(session);
             session.execute();
         }
 
         @Override
         public boolean isEnabled(NetBeansLauncher c) {
-            return c.resources.getScenario() != null;
+            return c.resources.getConfiguration() != null;
         }
 
         @Override
         public ActionAdapter toAction(NetBeansLauncher c) {
-            return super.toAction(c).withWeakPropertyChangeListener(c.resources, ResourcesPanel.SCENARIO_PROPERTY);
+            return super.toAction(c).withWeakPropertyChangeListener(c.resources, ResourcesPanel.CONFIGURATION_PROPERTY);
         }
     }
 

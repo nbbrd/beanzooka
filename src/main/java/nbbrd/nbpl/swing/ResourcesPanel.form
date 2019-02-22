@@ -22,7 +22,7 @@
                   <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="apps" alignment="0" max="32767" attributes="0"/>
-                  <Component id="configs" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jdks" alignment="0" max="32767" attributes="0"/>
                   <Component id="userDirs" alignment="0" min="-2" pref="276" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -50,7 +50,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="configs" min="-2" max="-2" attributes="0"/>
+                      <Component id="jdks" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -114,17 +114,17 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Config:"/>
+        <Property name="text" type="java.lang.String" value="JDK:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JComboBox" name="configs">
+    <Component class="javax.swing.JComboBox" name="jdks">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="0"/>
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;nbbrd.nbpl.core.Config&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;nbbrd.nbpl.core.Jdk&gt;"/>
       </AuxValues>
     </Component>
   </SubComponents>
