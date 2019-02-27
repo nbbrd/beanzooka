@@ -194,7 +194,7 @@ public final class DefaultListModel2<E> extends AbstractListModel<E> implements 
 
     @Override
     public <T> T[] toArray(IntFunction<T[]> generator) {
-        return delegate.toArray(generator);
+        return delegate.stream().toArray(generator);
     }
 
     @Override

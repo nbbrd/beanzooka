@@ -125,14 +125,10 @@ public class ListTableEdition<ROW> {
 
         private static void pullComboBox(JTable source, JComboBox target) {
             DefaultComboBoxModel model = new DefaultComboBoxModel();
-            model.addAll(((ListTableModel) source.getModel()).getRows());
+            ((ListTableModel) source.getModel()).getRows().forEach(model::addElement);
             target.setModel(model);
 
-            if (!source.getSelectionModel().isSelectionEmpty()) {
-                target.setSelectedIndex(source.getSelectionModel().getSelectedIndices()[0]);
-            } else {
-                target.setSelectedIndex(NO_SELECTION);
-            }
+            target.setSelectedIndex(JLists.getSelectionIndexStream(source.getSelectionModel()).findFirst().orElse(NO_SELECTION));
         }
 
         private static void pushList(JList source, JTable target) {
@@ -145,7 +141,7 @@ public class ListTableEdition<ROW> {
 
         private static void pullList(JTable source, JList target) {
             DefaultListModel model = new DefaultListModel();
-            model.addAll(((ListTableModel) source.getModel()).getRows());
+            ((ListTableModel) source.getModel()).getRows().forEach(model::addElement);
             target.setModel(model);
 
             JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
