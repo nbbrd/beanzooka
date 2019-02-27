@@ -47,11 +47,11 @@ public class Jdk {
 
     public Map<String, String> getConfigFileEntries() {
         Map<String, String> result = new HashMap<>();
-        result.put("jdkhome", getJavaHome().getPath());
-        if (getOptions() != null) {
+        result.put("jdkhome", javaHome.getPath());
+        if (options != null && !options.isEmpty()) {
             result.put("default_options", options);
         }
-        if (getClusters() != null) {
+        if (clusters != null && !clusters.isEmpty()) {
             result.put("extra_clusters", clusters);
         }
         return result;
