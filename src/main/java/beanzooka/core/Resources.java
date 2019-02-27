@@ -14,12 +14,9 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package beanzooka.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.util.List;
 
 /**
  *
@@ -28,17 +25,17 @@ import java.nio.file.FileSystems;
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
 @lombok.experimental.Wither
-public class Plugin {
+public class Resources {
 
-    @lombok.NonNull
-    private String label;
+    @lombok.Singular
+    private List<Jdk> jdks;
 
-    @lombok.NonNull
-    private File file;
+    @lombok.Singular
+    private List<App> apps;
 
-    public void extract(File folder) throws IOException {
-        try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
-            Util.copyAll(fs.getPath("/netbeans"), folder.toPath());
-        }
-    }
+    @lombok.Singular
+    private List<UserDir> userDirs;
+
+    @lombok.Singular
+    private List<Plugin> plugins;
 }

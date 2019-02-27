@@ -16,12 +16,12 @@
  */
 package internal.swing;
 
+import beanzooka.swing.MainPanel;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
-import nbbrd.nbpl.swing.NetBeansLauncher;
 
 /**
  *
@@ -34,7 +34,7 @@ public final class PersistantFileChooser extends JFileChooser {
     private final Preferences prefs;
 
     public PersistantFileChooser(Class<?> id) {
-        this.prefs = Preferences.userNodeForPackage(NetBeansLauncher.class);
+        this.prefs = Preferences.userNodeForPackage(MainPanel.class);
         loadCurrentDir();
     }
 

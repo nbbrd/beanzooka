@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 National Bank of Belgium
+ * Copyright 2019 National Bank of Belgium
  * 
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,28 +14,26 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package beanzooka;
 
-import java.util.List;
+import beanzooka.swing.MainPanel;
+import ec.util.various.swing.BasicSwingLauncher;
+import ec.util.various.swing.FontAwesome;
+import java.awt.Color;
 
 /**
  *
  * @author Philippe Charles
  */
-@lombok.Value
-@lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
-public class Resources {
+@lombok.experimental.UtilityClass
+public class Beanzooka {
 
-    @lombok.Singular
-    private List<Jdk> jdks;
-
-    @lombok.Singular
-    private List<App> apps;
-
-    @lombok.Singular
-    private List<UserDir> userDirs;
-
-    @lombok.Singular
-    private List<Plugin> plugins;
+    public static void main(String args[]) {
+        new BasicSwingLauncher()
+                .content(MainPanel.class)
+                .title("Beanzooka")
+                .icons(() -> FontAwesome.FA_ROCKET.getImages(Color.DARK_GRAY, 16f, 32f, 64f))
+                .size(600, 400)
+                .launch();
+    }
 }

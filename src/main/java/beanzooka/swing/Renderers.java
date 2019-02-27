@@ -14,8 +14,12 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.swing;
+package beanzooka.swing;
 
+import beanzooka.core.App;
+import beanzooka.core.Jdk;
+import beanzooka.core.Plugin;
+import beanzooka.core.UserDir;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
 import internal.swing.FileCellEditor;
@@ -28,10 +32,6 @@ import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
-import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Jdk;
-import nbbrd.nbpl.core.Plugin;
-import nbbrd.nbpl.core.UserDir;
 
 /**
  *

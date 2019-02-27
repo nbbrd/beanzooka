@@ -14,11 +14,10 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.swing;
+package beanzooka.swing;
 
-import nbbrd.nbpl.core.Resources;
-import nbbrd.nbpl.io.XmlResources;
-import ec.util.various.swing.BasicSwingLauncher;
+import beanzooka.core.Resources;
+import beanzooka.io.XmlResources;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
 import internal.swing.PersistantFileChooser;
@@ -43,21 +42,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author Philippe Charles
  */
 @lombok.extern.java.Log
-public final class NetBeansLauncher extends javax.swing.JPanel {
-
-    public static void main(String args[]) {
-        new BasicSwingLauncher()
-                .content(NetBeansLauncher.class)
-                .title("NetBeans Platform Launcher")
-                .icons(() -> FontAwesome.FA_ROCKET.getImages(Color.DARK_GRAY, 16f, 32f, 64f))
-                .size(600, 400)
-                .launch();
-    }
+public final class MainPanel extends javax.swing.JPanel {
 
     /**
      * Creates new form NetBeansLauncher
      */
-    public NetBeansLauncher() {
+    public MainPanel() {
         initComponents();
         initCommands();
     }
@@ -69,9 +59,9 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         new LaunchCmd().init(launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
     }
 
-    private static abstract class CustomCommand extends JCommand<NetBeansLauncher> {
+    private static abstract class CustomCommand extends JCommand<MainPanel> {
 
-        public CustomCommand init(JButton button, NetBeansLauncher c, FontAwesome icon, String toolTip, String key) {
+        public CustomCommand init(JButton button, MainPanel c, FontAwesome icon, String toolTip, String key) {
             Action action = toAction(c);
 
             button.setAction(action);
@@ -86,13 +76,13 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         }
 
         @Override
-        public ActionAdapter toAction(NetBeansLauncher component) {
+        public ActionAdapter toAction(MainPanel component) {
             return new ActionAdapterWithExceptionDialog(component);
         }
 
         private class ActionAdapterWithExceptionDialog extends ActionAdapter {
 
-            public ActionAdapterWithExceptionDialog(NetBeansLauncher c) {
+            public ActionAdapterWithExceptionDialog(MainPanel c) {
                 super(c);
             }
 
@@ -110,7 +100,7 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
     private static final class NewCmd extends CustomCommand {
 
         @Override
-        public void execute(NetBeansLauncher c) throws Exception {
+        public void execute(MainPanel c) throws Exception {
             c.resources.setResources(Resources.builder().build());
         }
     }
@@ -120,12 +110,12 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         private final JFileChooser fileChooser;
 
         private OpenCmd() {
-            this.fileChooser = new PersistantFileChooser(NetBeansLauncher.class);
+            this.fileChooser = new PersistantFileChooser(MainPanel.class);
             fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
         }
 
         @Override
-        public void execute(NetBeansLauncher c) throws Exception {
+        public void execute(MainPanel c) throws Exception {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(c)) {
                 c.resources.setResources(XmlResources.read(fileChooser.getSelectedFile().toPath()));
             }
@@ -137,12 +127,12 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         private final JFileChooser fileChooser;
 
         public SaveAsCmd() {
-            this.fileChooser = new PersistantFileChooser(NetBeansLauncher.class);
+            this.fileChooser = new PersistantFileChooser(MainPanel.class);
             fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
         }
 
         @Override
-        public void execute(NetBeansLauncher c) throws Exception {
+        public void execute(MainPanel c) throws Exception {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(c)) {
                 File target = fileChooser.getSelectedFile();
                 if (target.exists()) {
@@ -157,19 +147,19 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
     private static final class LaunchCmd extends CustomCommand {
 
         @Override
-        public void execute(NetBeansLauncher c) throws Exception {
+        public void execute(MainPanel c) throws Exception {
             Session session = Session.of(c.resources.getConfiguration().get());
             c.sessions.add(session);
             session.execute();
         }
 
         @Override
-        public boolean isEnabled(NetBeansLauncher c) {
+        public boolean isEnabled(MainPanel c) {
             return c.resources.getConfiguration().isPresent();
         }
 
         @Override
-        public ActionAdapter toAction(NetBeansLauncher c) {
+        public ActionAdapter toAction(MainPanel c) {
             return super.toAction(c)
                     .withWeakPropertyChangeListener(c.resources, ResourcesPanel.CONFIGURATION_PROPERTY);
         }
@@ -190,8 +180,8 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
         saveAsButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         launchButton = new javax.swing.JButton();
-        resources = new nbbrd.nbpl.swing.ResourcesPanel();
-        sessions = new nbbrd.nbpl.swing.SessionsPanel();
+        resources = new beanzooka.swing.ResourcesPanel();
+        sessions = new beanzooka.swing.SessionsPanel();
 
         setPreferredSize(new java.awt.Dimension(600, 400));
 
@@ -258,8 +248,8 @@ public final class NetBeansLauncher extends javax.swing.JPanel {
     private javax.swing.JButton launchButton;
     private javax.swing.JButton newButton;
     private javax.swing.JButton openButton;
-    private nbbrd.nbpl.swing.ResourcesPanel resources;
+    private beanzooka.swing.ResourcesPanel resources;
     private javax.swing.JButton saveAsButton;
-    private nbbrd.nbpl.swing.SessionsPanel sessions;
+    private beanzooka.swing.SessionsPanel sessions;
     // End of variables declaration//GEN-END:variables
 }

@@ -14,9 +14,9 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.swing;
+package beanzooka.swing;
 
-import nbbrd.nbpl.core.Configuration;
+import beanzooka.core.Configuration;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;

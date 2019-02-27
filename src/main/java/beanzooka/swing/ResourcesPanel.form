@@ -126,7 +126,7 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;nbbrd.nbpl.core.Jdk&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;beanzooka.core.Jdk&gt;"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JCheckBox" name="tempUserDir">

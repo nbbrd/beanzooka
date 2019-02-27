@@ -14,8 +14,13 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.io;
+package beanzooka.io;
 
+import beanzooka.core.App;
+import beanzooka.core.Jdk;
+import beanzooka.core.Plugin;
+import beanzooka.core.Resources;
+import beanzooka.core.UserDir;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -29,11 +34,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Jdk;
-import nbbrd.nbpl.core.Plugin;
-import nbbrd.nbpl.core.Resources;
-import nbbrd.nbpl.core.UserDir;
 
 /**
  *

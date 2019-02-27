@@ -94,9 +94,9 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="nbbrd.nbpl.swing.ResourcesPanel" name="resources">
+    <Component class="beanzooka.swing.ResourcesPanel" name="resources">
     </Component>
-    <Component class="nbbrd.nbpl.swing.SessionsPanel" name="sessions">
+    <Component class="beanzooka.swing.SessionsPanel" name="sessions">
     </Component>
   </SubComponents>
 </Form>

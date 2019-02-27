@@ -14,8 +14,14 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.swing;
+package beanzooka.swing;
 
+import beanzooka.core.App;
+import beanzooka.core.Configuration;
+import beanzooka.core.Jdk;
+import beanzooka.core.Plugin;
+import beanzooka.core.Resources;
+import beanzooka.core.UserDir;
 import internal.swing.SwingUtil;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
@@ -36,12 +42,6 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListSelectionEvent;
-import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Jdk;
-import nbbrd.nbpl.core.Configuration;
-import nbbrd.nbpl.core.Plugin;
-import nbbrd.nbpl.core.Resources;
-import nbbrd.nbpl.core.UserDir;
 
 /**
  *
@@ -351,7 +351,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JComboBox<nbbrd.nbpl.core.Jdk> jdks;
+    private javax.swing.JComboBox<beanzooka.core.Jdk> jdks;
     private javax.swing.JList<Plugin> plugins;
     private javax.swing.JCheckBox tempUserDir;
     private javax.swing.JComboBox<UserDir> userDirs;

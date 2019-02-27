@@ -14,7 +14,7 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package beanzooka.core;
 
 import java.io.File;
 import java.io.IOException;

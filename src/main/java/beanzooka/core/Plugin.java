@@ -14,12 +14,12 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.core;
+package beanzooka.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 
 /**
  *
@@ -27,31 +27,18 @@ import java.util.Optional;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-public class Configuration {
+@lombok.experimental.Wither
+public class Plugin {
 
-    private App app;
+    @lombok.NonNull
+    private String label;
 
-    private Jdk jdk;
+    @lombok.NonNull
+    private File file;
 
-    private Optional<UserDir> userDir;
-
-    private List<Plugin> plugins;
-
-    public File init() throws IOException {
-        File workingDir = userDir.orElse(UserDir.TEMP).createWorkingDir();
-
-        jdk.writeConfigFile(UserDir.resolveConfigFile(workingDir, app.getBranding()));
-
-        for (Plugin plugin : plugins) {
-            plugin.extract(workingDir);
+    public void extract(File folder) throws IOException {
+        try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
+            Util.copyAll(fs.getPath("/netbeans"), folder.toPath());
         }
-
-        return workingDir;
-    }
-
-    public void launch(File workingDir) throws Exception {
-        new ProcessBuilder(app.getFile().toString(), "--userdir", workingDir.toString())
-                .start()
-                .waitFor();
     }
 }

@@ -14,8 +14,11 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package nbbrd.nbpl.swing;
+package beanzooka.swing;
 
+import beanzooka.core.App;
+import beanzooka.core.Jdk;
+import beanzooka.core.UserDir;
 import ec.util.grid.swing.XTable;
 import internal.swing.SwingUtil;
 import ec.util.table.swing.JTables;
@@ -30,9 +33,6 @@ import javax.swing.JMenu;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
-import nbbrd.nbpl.core.App;
-import nbbrd.nbpl.core.Jdk;
-import nbbrd.nbpl.core.UserDir;
 
 /**
  *
