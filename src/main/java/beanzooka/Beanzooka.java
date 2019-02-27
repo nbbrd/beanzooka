@@ -18,8 +18,11 @@ package beanzooka;
 
 import beanzooka.swing.MainPanel;
 import ec.util.various.swing.BasicSwingLauncher;
-import ec.util.various.swing.FontAwesome;
-import java.awt.Color;
+import java.awt.Image;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -32,8 +35,17 @@ public class Beanzooka {
         new BasicSwingLauncher()
                 .content(MainPanel.class)
                 .title("Beanzooka")
-                .icons(() -> FontAwesome.FA_ROCKET.getImages(Color.DARK_GRAY, 16f, 32f, 64f))
+                .icons(Beanzooka::getIcons)
                 .size(600, 400)
                 .launch();
+    }
+
+    private List<? extends Image> getIcons() {
+        return IntStream.of(256, 128, 64, 48, 32, 16)
+                .mapToObj(size -> "beanzooka_redux_" + size + ".png")
+                .map(Beanzooka.class::getResource)
+                .map(ImageIcon::new)
+                .map(ImageIcon::getImage)
+                .collect(Collectors.toList());
     }
 }

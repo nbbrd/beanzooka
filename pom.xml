@@ -143,12 +143,18 @@ project.properties.setProperty('project.fileversion', fileversion)
                             <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
                             <jar>${project.build.directory}/${project.build.finalName}-bin.jar</jar>
                             <downloadUrl>https://adoptopenjdk.net/</downloadUrl>
+                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
                             <classPath>
                                 <mainClass>${project.mainClass}</mainClass>
                             </classPath>
                             <jre>
                                 <minVersion>${maven.compiler.target}</minVersion>
                             </jre>
+                            <splash>
+                                <file>${project.basedir}/logo/beanzooka.bmp</file>
+                                <waitForWindow>true</waitForWindow>
+                                <timeout>60</timeout>
+                            </splash>
                             <versionInfo>
                                 <fileVersion>${project.fileversion}</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
