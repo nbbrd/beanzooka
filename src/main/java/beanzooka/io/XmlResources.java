@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.xml.stream.XMLInputFactory;
@@ -110,13 +111,34 @@ public class XmlResources {
                             result.options(xml.getElementText());
                             break;
                         case CLUSTERS_TAG:
-                            result.clusters(xml.getElementText());
+                            result.clusters(readClusters(xml));
                             break;
                     }
                     break;
                 case XMLStreamReader.END_ELEMENT:
                     if (xml.getLocalName().equals(JDK_TAG)) {
                         return result.build();
+                    }
+                    break;
+            }
+        }
+        throw new RuntimeException();
+    }
+
+    private List<File> readClusters(XMLStreamReader xml) throws XMLStreamException {
+        List<File> result = new ArrayList<>();
+        while (xml.hasNext()) {
+            switch (xml.next()) {
+                case XMLStreamReader.START_ELEMENT:
+                    switch (xml.getLocalName()) {
+                        case CLUSTER_TAG:
+                            result.add(new File(xml.getElementText()));
+                            break;
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    if (xml.getLocalName().equals(CLUSTERS_TAG)) {
+                        return result;
                     }
                     break;
             }
@@ -213,8 +235,12 @@ public class XmlResources {
         writeValue(xml, LABEL_TAG, item.getLabel());
         writeValue(xml, JAVA_HOME_TAG, item.getJavaHome().toString());
         writeValue(xml, OPTIONS_TAG, item.getOptions());
-        writeValue(xml, CLUSTERS_TAG, item.getClusters());
+        writeList(xml, CLUSTERS_TAG, item.getClusters(), XmlResources::writeCluster);
         xml.writeEndElement();
+    }
+
+    private void writeCluster(XMLStreamWriter xml, File item) throws XMLStreamException {
+        writeValue(xml, CLUSTER_TAG, item.getPath());
     }
 
     private void writeApp(XMLStreamWriter xml, App item) throws XMLStreamException {
@@ -264,6 +290,7 @@ public class XmlResources {
     private static final String JDKS_TAG = "jdks";
     private static final String RESOURCES_TAG = "resources";
     private static final String CLUSTERS_TAG = "clusters";
+    private static final String CLUSTER_TAG = "cluster";
     private static final String OPTIONS_TAG = "options";
     private static final String JAVA_HOME_TAG = "javaHome";
     private static final String LABEL_TAG = "label";

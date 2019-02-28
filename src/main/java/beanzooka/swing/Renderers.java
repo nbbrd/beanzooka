@@ -23,11 +23,13 @@ import beanzooka.core.UserDir;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
 import internal.swing.FileCellEditor;
+import internal.swing.FilesCellEditor;
 import internal.swing.PersistantFileChooser;
 import internal.swing.TableColumnDescriptor;
 import internal.swing.TextCellEditor;
 import java.awt.Color;
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -57,6 +59,12 @@ class Renderers {
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
                     .cellEditor(FileCellEditor::new)
                     .preferedWidth(300)
+                    .build();
+
+    static final TableColumnDescriptor FILES_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFiles))
+                    .cellEditor(FilesCellEditor::new)
                     .build();
 
     static final TableColumnDescriptor FOLDER_DESCRIPTOR
@@ -103,6 +111,15 @@ class Renderers {
             label.setText(value.getPath());
             label.setToolTipText(value.toString());
             setIfInvalidFile(label, value);
+        } else {
+            label.setToolTipText(null);
+        }
+    }
+
+    void renderFiles(JLabel label, List<File> value) {
+        if (value != null) {
+            label.setText(Jdk.fromFiles(value));
+            label.setToolTipText("<html>" + label.getText().replace(File.pathSeparator, "<br>"));
         } else {
             label.setToolTipText(null);
         }

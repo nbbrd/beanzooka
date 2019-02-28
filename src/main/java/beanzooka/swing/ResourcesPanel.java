@@ -32,6 +32,7 @@ import internal.swing.TableColumnDescriptor;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -241,8 +242,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                     .valueFactory(Renderers::newJdk)
                     .column("Label", String.class, Jdk::getLabel, Jdk::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("Java home", File.class, Jdk::getJavaHome, Jdk::withJavaHome, Renderers.FOLDER_DESCRIPTOR)
-                    .column("Clusters", String.class, Jdk::getClusters, Jdk::withClusters, Renderers.TEXT_DESCRIPTOR)
                     .column("Options", String.class, Jdk::getOptions, Jdk::withOptions, Renderers.TEXT_DESCRIPTOR)
+                    .column("Clusters", List.class, Jdk::getClusters, Jdk::withClusters, Renderers.FILES_DESCRIPTOR)
                     .build();
 
     private static final ListTableEdition<UserDir> USER_DIRS

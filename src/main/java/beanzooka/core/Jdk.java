@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -43,7 +44,8 @@ public class Jdk {
 
     private String options;
 
-    private String clusters;
+    @lombok.Singular
+    private List<File> clusters;
 
     public Map<String, String> getConfigFileEntries() {
         Map<String, String> result = new HashMap<>();
@@ -52,7 +54,7 @@ public class Jdk {
             result.put("default_options", options);
         }
         if (clusters != null && !clusters.isEmpty()) {
-            result.put("extra_clusters", clusters);
+            result.put("extra_clusters", fromFiles(clusters));
         }
         return result;
     }
@@ -68,5 +70,13 @@ public class Jdk {
                 .map(o -> o.getKey() + "=\"" + o.getValue() + "\"")
                 .collect(Collectors.toList());
         Files.write(file.toPath(), content, StandardOpenOption.CREATE);
+    }
+
+    public static String fromFiles(List<File> files) {
+        return files.stream().map(File::getPath).collect(Collectors.joining(File.pathSeparator));
+    }
+
+    public static List<File> toFiles(String files) {
+        return Stream.of(files.split(File.pathSeparator, -1)).map(File::new).collect(Collectors.toList());
     }
 }
