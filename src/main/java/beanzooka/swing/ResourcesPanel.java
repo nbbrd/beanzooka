@@ -185,18 +185,13 @@ public final class ResourcesPanel extends javax.swing.JPanel {
             jdks.setSelectedItem(configuration.get().getJdk());
             userDirs.setSelectedItem(configuration.get().getUserDir());
 //        plugins.setSelectedIndices(job.getPlugins().stream().mapToInt(plugins.get));
-        } else {
-            apps.setSelectedItem(null);
-            jdks.setSelectedItem(null);
-            userDirs.setSelectedItem(null);
-            plugins.setSelectedIndex(-1);
         }
     }
 
     private void updateConfiguration() {
         if (apps.getSelectedIndex() != -1
                 && jdks.getSelectedIndex() != -1
-                && userDirs.getSelectedIndex() != -1) {
+                && (tempUserDir.isSelected() || userDirs.getSelectedIndex() != -1)) {
             setConfiguration(Optional.of(
                     Configuration
                             .builder()
