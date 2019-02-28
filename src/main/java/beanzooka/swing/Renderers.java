@@ -20,20 +20,30 @@ import beanzooka.core.App;
 import beanzooka.core.Jdk;
 import beanzooka.core.Plugin;
 import beanzooka.core.UserDir;
+import ec.util.completion.FileAutoCompletionSource;
+import ec.util.completion.swing.FileListCellRenderer;
+import ec.util.completion.swing.JAutoCompletion;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
-import internal.swing.FileCellEditor;
-import internal.swing.FilesCellEditor;
+import ec.util.various.swing.StandardSwingColor;
+import ec.util.various.swing.TextPrompt;
 import internal.swing.PersistantFileChooser;
 import internal.swing.TableColumnDescriptor;
+import internal.swing.Converter;
+import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
 import java.awt.Color;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -42,37 +52,90 @@ import javax.swing.SwingWorker;
 @lombok.experimental.UtilityClass
 class Renderers {
 
-    static final TableColumnDescriptor LABEL_DESCRIPTOR
+    final TableColumnDescriptor LABEL_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderLabel))
                     .preferedWidth(100)
                     .build();
 
-    static final TableColumnDescriptor TEXT_DESCRIPTOR
+    final TableColumnDescriptor OPTIONS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
-                    .cellEditor(TextCellEditor::new)
+                    .cellEditor(() -> new TextCellEditor<>(Converter.identity(), newOptionsField(), Renderers::onMoreOptions))
                     .build();
 
-    static final TableColumnDescriptor FILE_DESCRIPTOR
+    private final String OPTIONS_PROMPT = "options used by the launcher";
+
+    private JTextField newOptionsField() {
+        JTextField result = new JTextField();
+        withPrompt(OPTIONS_PROMPT, result);
+        return result;
+    }
+
+    private void onMoreOptions(JTextField textField) {
+        JTextArea result = new JTextArea(textField.getText());
+        result.setLineWrap(true);
+        withPrompt(OPTIONS_PROMPT, result);
+        if (SwingUtil.showOkCancelDialog(textField, new JScrollPane(result), "Options")) {
+            textField.setText(result.getText());
+        }
+    }
+
+    final TableColumnDescriptor FILE_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
-                    .cellEditor(FileCellEditor::new)
+                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFileField(), Renderers::onMoreFile))
                     .preferedWidth(300)
                     .build();
 
-    static final TableColumnDescriptor FILES_DESCRIPTOR
+    private JTextField newFileField() {
+        JTextField result = new JTextField();
+        withPrompt("file path", result);
+        JAutoCompletion completion = new JAutoCompletion(result);
+        completion.setSource(new FileAutoCompletionSource());
+        completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
+        return result;
+    }
+
+    private void onMoreFile(JTextField textField) {
+        JFileChooser result = new JFileChooser();
+        result.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        if (result.showOpenDialog(textField) == JFileChooser.APPROVE_OPTION) {
+            textField.setText(result.getSelectedFile().toString());
+        }
+    }
+
+    final TableColumnDescriptor CLUSTERS_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFiles))
-                    .cellEditor(FilesCellEditor::new)
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
+                    .cellEditor(() -> new TextCellEditor<>(Converter.of(Jdk::fromFiles, Jdk::toFiles), newClustersField(), null))
                     .build();
 
-    static final TableColumnDescriptor FOLDER_DESCRIPTOR
+    private JTextField newClustersField() {
+        JTextField result = new JTextField();
+        withPrompt("cluster paths separated by '" + File.pathSeparator + "'", result);
+        JAutoCompletion completion = new JAutoCompletion(result);
+        completion.setSource(new FileAutoCompletionSource());
+        completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
+        completion.setSeparator(File.pathSeparator);
+        return result;
+    }
+
+    final TableColumnDescriptor FOLDER_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
-                    .cellEditor(FileCellEditor::new)
+                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFolderField(), Renderers::onMoreFile))
                     .preferedWidth(300)
                     .build();
+
+    private JTextField newFolderField() {
+        JTextField result = new JTextField();
+        withPrompt("folder path", result);
+        JAutoCompletion completion = new JAutoCompletion(result);
+        completion.setSource(new FileAutoCompletionSource());
+        completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
+        return result;
+    }
 
     void renderApp(JLabel label, App value) {
         if (value != null) {
@@ -116,7 +179,7 @@ class Renderers {
         }
     }
 
-    void renderFiles(JLabel label, List<File> value) {
+    void renderClusters(JLabel label, List<File> value) {
         if (value != null) {
             label.setText(Jdk.fromFiles(value));
             label.setToolTipText("<html>" + label.getText().replace(File.pathSeparator, "<br>"));
@@ -213,5 +276,12 @@ class Renderers {
         return file != null
                 ? Plugin.builder().label(file.getName()).file(file).build()
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
+    }
+
+    private void withPrompt(String text, JTextComponent component) {
+        TextPrompt prompt = new TextPrompt(text, component);
+        StandardSwingColor.TEXT_FIELD_INACTIVE_FOREGROUND.lookup().ifPresent(prompt::setForeground);
+        prompt.setVerticalAlignment(JLabel.CENTER);
+        prompt.setHorizontalAlignment(JLabel.CENTER);
     }
 }

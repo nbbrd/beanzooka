@@ -20,14 +20,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
+import java.util.function.Consumer;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.border.LineBorder;
@@ -35,40 +32,45 @@ import javax.swing.border.LineBorder;
 /**
  *
  * @author Philippe Charles
+ * @param <T>
  */
-public final class TextCellEditor extends DefaultCellEditor {
+public final class TextCellEditor<T> extends DefaultCellEditor {
 
     private final JPanel customComponent;
 
-    public TextCellEditor() {
-        super(createTextField());
+    public TextCellEditor(Converter<T, String> converter, Consumer<JTextField> onMoreAction) {
+        this(converter, new JTextField(), onMoreAction);
+    }
+
+    public TextCellEditor(Converter<T, String> converter, JTextField textField, Consumer<JTextField> onMoreAction) {
+        super(textField);
         this.customComponent = new JPanel(new BorderLayout());
-        customComponent.add(super.getComponent(), BorderLayout.CENTER);
-        customComponent.add(createButton(), BorderLayout.EAST);
-    }
-
-    private static JTextField createTextField() {
-        JTextField result = new JTextField();
-        result.setBorder(new LineBorder(Color.black));
-        return result;
-    }
-
-    private JButton createButton() {
-        JButton result = new JButton();
-        result.setAction(new AbstractAction() {
-            final JTextArea fileChooser = new JTextArea();
+        this.delegate = new EditorDelegate() {
+            @Override
+            public void setValue(Object value) {
+                textField.setText(value != null ? converter.applyForward((T) value) : "");
+            }
 
             @Override
-            public void actionPerformed(ActionEvent e) {
-                JTextArea textArea = new JTextArea(((JTextField) TextCellEditor.super.getComponent()).getText());
-                if (SwingUtil.showOkCancelDialog(null, new JScrollPane(textArea), "")) {
-                    ((JTextField) TextCellEditor.super.getComponent()).setText(textArea.getText());
-                }
+            public Object getCellEditorValue() {
+                return converter.applyBackward(textField.getText());
             }
-        });
-        result.setText("\u2026");
-        result.setMargin(new Insets(0, 1, 0, 1));
-        return result;
+        };
+
+        textField.setBorder(new LineBorder(Color.black));
+        customComponent.add(textField, BorderLayout.CENTER);
+
+        if (onMoreAction != null) {
+            JButton moreButton = new JButton();
+            moreButton.addActionListener(event -> onMoreAction.accept(getTextField()));
+            moreButton.setText("\u2026");
+            moreButton.setMargin(new Insets(0, 1, 0, 1));
+            customComponent.add(moreButton, BorderLayout.EAST);
+        }
+    }
+
+    private JTextField getTextField() {
+        return (JTextField) super.getComponent();
     }
 
     @Override
