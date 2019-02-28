@@ -71,7 +71,7 @@ public class ListTableEdition<ROW> {
     public static class Builder<ROW> {
 
         public <CELL> Builder<ROW> column(String name, Class<CELL> type, Function<ROW, CELL> extractor, BiFunction<ROW, CELL, ROW> updater, TableColumnDescriptor descriptor) {
-            columnHandler(new ListTableModel.Column(name, type, extractor, updater));
+            columnHandler(new ListTableModel.Column(name, type, Accessor.of(extractor, updater)));
             columnDescriptor(name, descriptor);
             return this;
         }

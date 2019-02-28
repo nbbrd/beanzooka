@@ -18,8 +18,6 @@ package internal.swing;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import javax.swing.MutableComboBoxModel;
@@ -96,17 +94,25 @@ public final class ListTableModel<ROW> extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return columns.get(columnIndex).getExtractor().apply(rows.get(rowIndex));
+        Accessor<ROW, Object> accessor = columns.get(columnIndex).getAccessor();
+        ROW row = rows.get(rowIndex);
+        return accessor.canRead(row) ? accessor.read(row) : null;
     }
 
     @Override
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
-        rows.set(rowIndex, columns.get(columnIndex).getUpdater().apply(rows.get(rowIndex), value));
+        Accessor<ROW, Object> accessor = columns.get(columnIndex).getAccessor();
+        ROW row = rows.get(rowIndex);
+        if (accessor.canWrite(row)) {
+            rows.set(rowIndex, accessor.write(row, value));
+        }
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        Accessor<ROW, Object> accessor = columns.get(columnIndex).getAccessor();
+        ROW row = rows.get(rowIndex);
+        return accessor.canWrite(row);
     }
 
     public List<ROW> getRows() {
@@ -141,9 +147,6 @@ public final class ListTableModel<ROW> extends AbstractTableModel {
         private Class<CELL> type;
 
         @lombok.NonNull
-        private Function<ROW, CELL> extractor;
-
-        @lombok.NonNull
-        private BiFunction<ROW, CELL, ROW> updater;
+        private Accessor<ROW, CELL> accessor;
     }
 }
