@@ -37,6 +37,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -138,67 +139,69 @@ class Renderers {
     }
 
     void renderApp(JLabel label, App value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getLabel());
             label.setToolTipText(value.getFile().toString());
             setIfInvalidFile(label, value.getFile());
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderJdk(JLabel label, Jdk value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getLabel());
             label.setToolTipText(value.getJavaHome().toString());
             setIfInvalidFolder(label, value.getJavaHome());
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderUserDir(JLabel label, UserDir value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getLabel());
             label.setToolTipText(value.getFolder().toString());
             if (value.isClone()) {
                 setIfInvalidFolder(label, value.getFolder());
             }
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderFile(JLabel label, File value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getPath());
             label.setToolTipText(value.toString());
             setIfInvalidFile(label, value);
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderClusters(JLabel label, List<File> value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(Jdk.fromFiles(value));
             label.setToolTipText("<html>" + label.getText().replace(File.pathSeparator, "<br>"));
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderFolder(JLabel label, File value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getPath());
             label.setToolTipText(value.toString());
             setIfInvalidFolder(label, value);
-        } else {
-            label.setToolTipText(null);
         }
     }
 
     void renderPlugin(JLabel label, Plugin value) {
+        label.setIcon(null);
+        label.setToolTipText(null);
         if (value != null) {
             label.setText(value.getLabel());
             label.setToolTipText(value.getFile().toString());
@@ -221,19 +224,27 @@ class Renderers {
     }
 
     private void setIfInvalidFolder(JLabel label, File folder) {
-        if (!folder.exists() || !folder.isDirectory()) {
-            label.setIcon(FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f));
-        } else {
-            label.setIcon(null);
+        if (!folder.exists()) {
+            label.setIcon(getErrorIcon(label));
+            label.setToolTipText("Error: folder doesn't exist");
+        } else if (!folder.isDirectory()) {
+            label.setIcon(getErrorIcon(label));
+            label.setToolTipText("Error: not a folder");
         }
     }
 
     private void setIfInvalidFile(JLabel label, File folder) {
-        if (!folder.exists() || folder.isDirectory()) {
-            label.setIcon(FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f));
-        } else {
-            label.setIcon(null);
+        if (!folder.exists()) {
+            label.setIcon(getErrorIcon(label));
+            label.setToolTipText("Error: file doesn't exist");
+        } else if (folder.isDirectory()) {
+            label.setIcon(getErrorIcon(label));
+            label.setToolTipText("Error: not a file");
         }
+    }
+
+    private Icon getErrorIcon(JLabel label) {
+        return FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f);
     }
 
     private File openFile(Class<?> id) {
