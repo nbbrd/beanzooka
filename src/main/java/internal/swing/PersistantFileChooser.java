@@ -21,7 +21,10 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -52,6 +55,7 @@ public final class PersistantFileChooser extends JFileChooser {
         int result = super.showSaveDialog(parent);
         if (result == APPROVE_OPTION) {
             storeCurrentDir();
+            forceFileExtension();
         }
         return result;
     }
@@ -65,5 +69,20 @@ public final class PersistantFileChooser extends JFileChooser {
 
     private void storeCurrentDir() {
         prefs.put(LAST_USED_FILE, getCurrentDirectory().toString());
+    }
+
+    private void forceFileExtension() {
+        FileFilter filter = getFileFilter();
+        if (filter instanceof FileNameExtensionFilter) {
+            String[] exts = ((FileNameExtensionFilter) filter).getExtensions();
+            if (exts.length == 0) {
+                return;
+            }
+            File file = getSelectedFile();
+            if (Stream.of(exts).map(String::toLowerCase).anyMatch(ext -> file.getName().toLowerCase().endsWith(ext))) {
+                return;
+            }
+            setSelectedFile(new File(file.getPath() + "." + exts[0]));
+        }
     }
 }
