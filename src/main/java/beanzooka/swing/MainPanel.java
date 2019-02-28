@@ -135,12 +135,14 @@ public final class MainPanel extends javax.swing.JPanel {
         public void execute(MainPanel c) throws Exception {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(c)) {
                 File target = fileChooser.getSelectedFile();
-                if (target.exists()) {
-                    if (JOptionPane.showConfirmDialog(c, "File exists already. Delete it anyway?", "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                        XmlResources.write(target.toPath(), c.resources.getResources());
-                    }
+                if (!target.exists() || confirm(c)) {
+                    XmlResources.write(target.toPath(), c.resources.getResources());
                 }
             }
+        }
+
+        private boolean confirm(MainPanel c) {
+            return JOptionPane.showConfirmDialog(c, "File exists already. Delete it anyway?", "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
         }
     }
 
