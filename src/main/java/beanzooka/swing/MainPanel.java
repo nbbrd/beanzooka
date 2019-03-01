@@ -20,13 +20,14 @@ import beanzooka.core.Resources;
 import beanzooka.io.XmlResources;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
-import internal.swing.PersistantFileChooser;
+import internal.swing.JFileChoosers;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 import javax.swing.Action;
 import javax.swing.JButton;
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
@@ -105,44 +106,34 @@ public final class MainPanel extends javax.swing.JPanel {
         }
     }
 
+    private static JFileChooser newResourcesFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        JFileChoosers.autoPersistUserNodeForClass(fileChooser, Resources.class);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
+        return fileChooser;
+    }
+
     private static final class OpenCmd extends CustomCommand {
-
-        private final JFileChooser fileChooser;
-
-        private OpenCmd() {
-            this.fileChooser = new PersistantFileChooser(MainPanel.class);
-            fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
-        }
 
         @Override
         public void execute(MainPanel c) throws Exception {
-            if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(c)) {
-                c.resources.setResources(XmlResources.read(fileChooser.getSelectedFile().toPath()));
+            JFileChooser fileChooser = newResourcesFileChooser();
+            Optional<File> file = JFileChoosers.getOpenFile(fileChooser, c);
+            if (file.isPresent()) {
+                c.resources.setResources(XmlResources.read(file.get().toPath()));
             }
         }
     }
 
     private static final class SaveAsCmd extends CustomCommand {
 
-        private final JFileChooser fileChooser;
-
-        public SaveAsCmd() {
-            this.fileChooser = new PersistantFileChooser(MainPanel.class);
-            fileChooser.setFileFilter(new FileNameExtensionFilter("XML Files", "xml"));
-        }
-
         @Override
         public void execute(MainPanel c) throws Exception {
-            if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(c)) {
-                File target = fileChooser.getSelectedFile();
-                if (!target.exists() || confirm(c)) {
-                    XmlResources.write(target.toPath(), c.resources.getResources());
-                }
+            JFileChooser fileChooser = newResourcesFileChooser();
+            Optional<File> file = JFileChoosers.getSaveFile(fileChooser, c);
+            if (file.isPresent()) {
+                XmlResources.write(file.get().toPath(), c.resources.getResources());
             }
-        }
-
-        private boolean confirm(MainPanel c) {
-            return JOptionPane.showConfirmDialog(c, "File exists already. Delete it anyway?", "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
         }
     }
 

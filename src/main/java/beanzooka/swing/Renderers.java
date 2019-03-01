@@ -27,9 +27,9 @@ import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
-import internal.swing.PersistantFileChooser;
 import internal.swing.TableColumnDescriptor;
 import internal.swing.Converter;
+import internal.swing.JFileChoosers;
 import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
 import java.awt.Color;
@@ -37,6 +37,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.prefs.Preferences;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -100,10 +101,9 @@ class Renderers {
 
     private void onMoreFile(JTextField textField) {
         JFileChooser result = new JFileChooser();
-        result.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        if (result.showOpenDialog(textField) == JFileChooser.APPROVE_OPTION) {
-            textField.setText(result.getSelectedFile().toString());
-        }
+        result.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        result.setSelectedFile(new File(textField.getText()));
+        JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
     }
 
     final TableColumnDescriptor CLUSTERS_DESCRIPTOR
@@ -125,7 +125,7 @@ class Renderers {
     final TableColumnDescriptor FOLDER_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFolderField(), Renderers::onMoreFile))
+                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFolderField(), Renderers::onMoreFolder))
                     .preferedWidth(300)
                     .build();
 
@@ -136,6 +136,13 @@ class Renderers {
         completion.setSource(new FileAutoCompletionSource());
         completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
         return result;
+    }
+
+    private void onMoreFolder(JTextField textField) {
+        JFileChooser result = new JFileChooser();
+        result.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        result.setSelectedFile(new File(textField.getText()));
+        JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
     }
 
     void renderApp(JLabel label, App value) {
@@ -247,12 +254,11 @@ class Renderers {
         return FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f);
     }
 
-    private File openFile(Class<?> id) {
-        JFileChooser fileChooser = new PersistantFileChooser(id);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        return fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION
-                ? fileChooser.getSelectedFile()
-                : null;
+    private File open(Class<?> id, int fileSelectionMode) {
+        JFileChooser fileChooser = new JFileChooser();
+        JFileChoosers.autoPersist(fileChooser, Preferences.userNodeForPackage(id).node(id.getSimpleName()));
+        fileChooser.setFileSelectionMode(fileSelectionMode);
+        return JFileChoosers.getOpenFile(fileChooser, null).orElse(null);
     }
 
     private final File EMPTY_FILE = new File("");
@@ -262,28 +268,28 @@ class Renderers {
     }
 
     public App newApp() {
-        File file = openFile(App.class);
+        File file = open(App.class, JFileChooser.FILES_ONLY);
         return file != null
                 ? App.builder().label(file.getName()).file(file).build()
                 : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
     public Jdk newJdk() {
-        File file = openFile(Jdk.class);
-        return file != null
-                ? Jdk.builder().label(file.getName()).javaHome(file).build()
+        File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY);
+        return folder != null
+                ? Jdk.builder().label(folder.getName()).javaHome(folder).build()
                 : Jdk.builder().label(randomLabel()).javaHome(EMPTY_FILE).build();
     }
 
     public UserDir newUserDir() {
-        File file = openFile(UserDir.class);
-        return file != null
-                ? UserDir.builder().label(file.getName()).folder(file).build()
+        File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY);
+        return folder != null
+                ? UserDir.builder().label(folder.getName()).folder(folder).build()
                 : UserDir.builder().label(randomLabel()).folder(EMPTY_FILE).build();
     }
 
     public Plugin newPlugin() {
-        File file = openFile(Plugin.class);
+        File file = open(Plugin.class, JFileChooser.FILES_ONLY);
         return file != null
                 ? Plugin.builder().label(file.getName()).file(file).build()
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
