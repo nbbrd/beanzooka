@@ -18,6 +18,7 @@ package internal.swing;
 
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeListener;
+import java.util.function.Consumer;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionListener;
@@ -30,63 +31,51 @@ public final class EventShield {
 
     private boolean updating = false;
 
-    public PropertyChangeListener wrap(PropertyChangeListener listener) {
-        return event -> {
-            if (!updating) {
-                updating = true;
-                listener.propertyChange(event);
-                updating = false;
+    private boolean acquire() {
+        return !updating && (updating = true);
+    }
+
+    private void release() {
+        updating = false;
+    }
+
+    private <T> void forward(T event, Consumer<T> listener) {
+        if (acquire()) {
+            try {
+                listener.accept(event);
+            } finally {
+                release();
             }
-        };
+        }
+    }
+
+    public PropertyChangeListener wrap(PropertyChangeListener listener) {
+        return event -> forward(event, listener::propertyChange);
     }
 
     public ItemListener wrap(ItemListener listener) {
-        return event -> {
-            if (!updating) {
-                updating = true;
-                listener.itemStateChanged(event);
-                updating = false;
-            }
-        };
+        return event -> forward(event, listener::itemStateChanged);
     }
 
     public ListSelectionListener wrap(ListSelectionListener listener) {
-        return event -> {
-            if (!updating) {
-                updating = true;
-                listener.valueChanged(event);
-                updating = false;
-            }
-        };
+        return event -> forward(event, listener::valueChanged);
     }
 
     public ListDataListener wrap(ListDataListener listener) {
         return new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
-                if (!updating) {
-                    updating = true;
-                    listener.intervalAdded(e);
-                    updating = false;
-                }
+                forward(e, listener::intervalAdded);
             }
 
             @Override
             public void intervalRemoved(ListDataEvent e) {
-                if (!updating) {
-                    updating = true;
-                    listener.intervalRemoved(e);
-                    updating = false;
-                }
+                forward(e, listener::intervalRemoved);
             }
 
             @Override
             public void contentsChanged(ListDataEvent e) {
-                if (!updating) {
-                    updating = true;
-                    listener.contentsChanged(e);
-                    updating = false;
-                }
+                forward(e, listener::contentsChanged);
             }
         };
     }
