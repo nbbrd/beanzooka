@@ -20,6 +20,8 @@ import beanzooka.core.Resources;
 import beanzooka.io.XmlResources;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
+import internal.swing.About;
+import internal.swing.FixedImageIcon;
 import internal.swing.JFileChoosers;
 import internal.swing.SwingUtil;
 import java.awt.Color;
@@ -30,12 +32,15 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
 import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -60,6 +65,7 @@ public final class MainPanel extends javax.swing.JPanel {
         new OpenCmd().init(openButton, this, FontAwesome.FA_FOLDER_OPEN, "Open", "F2");
         new SaveAsCmd().init(saveAsButton, this, FontAwesome.FA_UPLOAD, "Save as", "F3");
         new LaunchCmd().init(launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
+        new AboutCmd().init(aboutButton, this, FontAwesome.FA_INFO_CIRCLE, "About", "F7");
     }
 
     private void preventClosing() {
@@ -168,6 +174,30 @@ public final class MainPanel extends javax.swing.JPanel {
         }
     }
 
+    private static final class AboutCmd extends CustomCommand {
+
+        @Override
+        public void execute(MainPanel c) throws Exception {
+            JTextPane html = new JTextPane();
+            html.setContentType("text/html");
+            html.setText(toHtml(About.lookup()));
+            html.setEditable(false);
+
+            Icon icon = new FixedImageIcon(new ImageIcon(MainPanel.class.getResource("/beanzooka/beanzooka_redux_32.png")));
+            JOptionPane.showMessageDialog(c, new JScrollPane(html), "About", JOptionPane.INFORMATION_MESSAGE, icon);
+        }
+
+        private String toHtml(About about) {
+            return new StringBuilder()
+                    .append("<html>")
+                    .append("<b>Application:</b> ").append(about.getApplication()).append("<br>")
+                    .append("<b>Java:</b> ").append(about.getJava()).append("<br>")
+                    .append("<b>Runtime:</b> ").append(about.getRuntime()).append("<br>")
+                    .append("<b>System:</b> ").append(about.getSystem()).append("<br>")
+                    .toString();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -183,6 +213,8 @@ public final class MainPanel extends javax.swing.JPanel {
         saveAsButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         launchButton = new javax.swing.JButton();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        aboutButton = new javax.swing.JButton();
         resources = new beanzooka.swing.ResourcesPanel();
         sessions = new beanzooka.swing.SessionsPanel();
 
@@ -219,6 +251,13 @@ public final class MainPanel extends javax.swing.JPanel {
         launchButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         launchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(launchButton);
+        jToolBar1.add(filler1);
+
+        aboutButton.setText("about");
+        aboutButton.setFocusable(false);
+        aboutButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        aboutButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(aboutButton);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -246,6 +285,8 @@ public final class MainPanel extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton aboutButton;
+    private javax.swing.Box.Filler filler1;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JButton launchButton;
