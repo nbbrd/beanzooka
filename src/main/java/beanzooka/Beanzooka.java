@@ -18,6 +18,7 @@ package beanzooka;
 
 import beanzooka.swing.MainPanel;
 import ec.util.various.swing.BasicSwingLauncher;
+import internal.swing.ManifestVersionProvider;
 import java.awt.Image;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class Beanzooka {
     public static void main(String args[]) {
         new BasicSwingLauncher()
                 .content(MainPanel.class)
-                .title("Beanzooka")
+                .title("Beanzooka " + ManifestVersionProvider.get().orElse("..."))
                 .icons(Beanzooka::getIcons)
                 .size(600, 400)
                 .launch();

@@ -88,6 +88,7 @@
     
     <build>
         <plugins>
+            <!-- Enforce use of JDK8 API -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -108,6 +109,21 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Put project version in manifest in order to make it available at runtime -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
             
             <!-- Generates a all-in-one executable jar -->
