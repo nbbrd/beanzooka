@@ -51,6 +51,10 @@ public final class SessionsPanel extends javax.swing.JPanel {
         initComponents2();
     }
 
+    public boolean isRunning() {
+        return sessionModel.isRunning();
+    }
+
     public void add(Session session) {
         sessionModel.add(session);
     }
@@ -166,6 +170,11 @@ public final class SessionsPanel extends javax.swing.JPanel {
     private static final class SessionTableModel extends AbstractTableModel {
 
         private final List<Session> list = new ArrayList<>();
+
+        public boolean isRunning() {
+            return list.stream()
+                    .anyMatch(session -> !session.getState().equals(SwingWorker.StateValue.DONE));
+        }
 
         public void add(Session session) {
             list.add(session);

@@ -21,6 +21,7 @@ import beanzooka.io.XmlResources;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
 import internal.swing.JFileChoosers;
+import internal.swing.SwingUtil;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -51,6 +52,7 @@ public final class MainPanel extends javax.swing.JPanel {
     public MainPanel() {
         initComponents();
         initCommands();
+        preventClosing();
     }
 
     private void initCommands() {
@@ -58,6 +60,14 @@ public final class MainPanel extends javax.swing.JPanel {
         new OpenCmd().init(openButton, this, FontAwesome.FA_FOLDER_OPEN, "Open", "F2");
         new SaveAsCmd().init(saveAsButton, this, FontAwesome.FA_UPLOAD, "Save as", "F3");
         new LaunchCmd().init(launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
+    }
+
+    private void preventClosing() {
+        SwingUtil.preventClosing(this, this::canClose);
+    }
+
+    private boolean canClose() {
+        return !sessions.isRunning() || JOptionPane.showConfirmDialog(MainPanel.this, "Some sessions are still running.\nDo you want to close the application anyway?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private static abstract class CustomCommand extends JCommand<MainPanel> {
