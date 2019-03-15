@@ -1,0 +1,27 @@
+language: java
+jdk:
+  - oraclejdk8
+  - openjdk11
+
+env:
+  global:
+    - DEPLOY_JDK=oraclejdk8
+    - DEPLOY_REPO=nbbrd/beanzooka
+
+deploy:
+  # Github releases from tags
+  - provider: releases
+    api_key: "${GITHUB_KEY}"
+    skip_cleanup: true
+    file_glob: true
+    file: 
+      - "target/*-bin.jar"
+      - "target/*.exe"
+    on:
+      tags: true
+      repo: "${DEPLOY_REPO}"
+      condition: $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_JDK_VERSION == $DEPLOY_JDK
+
+cache:
+  directories:
+    - $HOME/.m2
