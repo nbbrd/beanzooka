@@ -13,6 +13,7 @@ deploy:
   - provider: releases
     api_key: "${GITHUB_KEY}"
     skip_cleanup: true
+    draft: true
     file_glob: true
     file: 
       - "target/*-bin.jar"
