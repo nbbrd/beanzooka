@@ -7,6 +7,7 @@ env:
   global:
     - DEPLOY_JDK=oraclejdk8
     - DEPLOY_REPO=nbbrd/beanzooka
+    - DEPLOY_BIN=target/binaries/*
 
 deploy:
   # Github releases from tags
@@ -15,9 +16,7 @@ deploy:
     skip_cleanup: true
     draft: true
     file_glob: true
-    file: 
-      - "target/*-bin.jar"
-      - "target/*.exe"
+    file: "${DEPLOY_BIN}"
     on:
       tags: true
       repo: "${DEPLOY_REPO}"

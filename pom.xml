@@ -23,42 +23,28 @@
     </licenses>
 
     <properties>
-        <!-- build -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
-        <maven-jar-plugin.version>2.1</maven-jar-plugin.version>
-        <launch4j-maven-plugin.version>1.7.23</launch4j-maven-plugin.version>
-        <gmavenplus-plugin.version>1.6</gmavenplus-plugin.version>
-        <groovy-all.version>2.4.4</groovy-all.version>
-        <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
-
-        <!-- dev support -->
-        <jsr305.version>3.0.2</jsr305.version>
-        <lombok.version>1.18.4</lombok.version>
-
-        <!-- other -->
-        <project.mainClass>beanzooka.Beanzooka</project.mainClass>
-        <project.copyright>National Bank of Belgium</project.copyright>
+        <project.x.mainClass>beanzooka.Beanzooka</project.x.mainClass>
+        <project.x.binaries>${project.build.directory}/binaries</project.x.binaries>
+        <project.x.headerType>gui</project.x.headerType>
         <java-desktop-util.version>2.2.3-SNAPSHOT</java-desktop-util.version>
     </properties>
 
     <dependencies>
-        <!-- compile only -->
+        <!-- annotations & processors -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>${jsr305.version}</version>
+            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <version>1.18.4</version>
             <scope>provided</scope>
         </dependency>
-        <!-- compile and runtime -->
+
+        <!-- dependencies -->
         <dependency>
             <groupId>be.nbb.rd</groupId>
             <artifactId>java-desktop-util-swing</artifactId>
@@ -88,34 +74,10 @@
     
     <build>
         <plugins>
-            <!-- Enforce use of JDK8 API -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>${animal-sniffer-maven-plugin.version}</version>
-                <configuration>
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java18</artifactId>
-                        <version>1.0</version>
-                    </signature>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-java18</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Put project version in manifest in order to make it available at runtime -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -130,7 +92,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -143,24 +105,25 @@
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>${project.mainClass}</mainClass>
+                            <mainClass>${project.x.mainClass}</mainClass>
                         </transformer>
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>
+                    <outputDirectory>${project.x.binaries}</outputDirectory>
                 </configuration>
             </plugin>
             
-            <!-- Generates ${project.fileversion} from project version -->
+            <!-- Generates ${project.x.fileversion} from project version -->
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>${gmavenplus-plugin.version}</version>
+                <version>1.6</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>${groovy-all.version}</version>
+                        <version>2.4.4</version>
                         <scope>runtime</scope>
                     </dependency>
                 </dependencies>
@@ -174,9 +137,9 @@
                         <configuration>
                             <scripts>
                                 <script>
-                                    <![CDATA[
+                        <![CDATA[
 fileversion = "${project.version}".replace("-SNAPSHOT", "") + ".0"
-project.properties.setProperty('project.fileversion', fileversion)
+project.properties.setProperty('project.x.fileversion', fileversion)
 ]]>
                                 </script>
                             </scripts>
@@ -184,12 +147,12 @@ project.properties.setProperty('project.fileversion', fileversion)
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Generates a Windows exe -->
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
-                <version>${launch4j-maven-plugin.version}</version>
+                <version>1.7.23</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -197,48 +160,124 @@ project.properties.setProperty('project.fileversion', fileversion)
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <headerType>gui</headerType>
-                            <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
-                            <jar>${project.build.directory}/${project.build.finalName}-bin.jar</jar>
+                            <headerType>${project.x.headerType}</headerType>
+                            <outfile>${project.x.binaries}/${project.build.finalName}.exe</outfile>
+                            <jar>${project.x.binaries}/${project.build.finalName}-bin.jar</jar>
                             <downloadUrl>https://adoptopenjdk.net/</downloadUrl>
-                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
                             <classPath>
-                                <mainClass>${project.mainClass}</mainClass>
+                                <mainClass>${project.x.mainClass}</mainClass>
                             </classPath>
                             <jre>
                                 <minVersion>${maven.compiler.target}</minVersion>
                             </jre>
-                            <splash>
-                                <file>${project.basedir}/logo/beanzooka.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>60</timeout>
-                            </splash>
                             <versionInfo>
-                                <fileVersion>${project.fileversion}</fileVersion>
+                                <fileVersion>${project.x.fileversion}</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <fileDescription>${project.description}</fileDescription>
-                                <copyright>${project.copyright}</copyright>
-                                <productVersion>${project.fileversion}</productVersion>
+                                <copyright>${project.organization.name}</copyright>
+                                <productVersion>${project.x.fileversion}</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
                                 <productName>${project.name}</productName>
                                 <internalName>${project.name}</internalName>
                                 <originalFilename>${project.name}.exe</originalFilename>
                             </versionInfo>
+                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
+                            <splash>
+                                <file>${project.basedir}/logo/beanzooka.bmp</file>
+                                <waitForWindow>true</waitForWindow>
+                                <timeout>60</timeout>
+                            </splash>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            
+            <!-- Generates SHA256 on binaries -->
+            <plugin>
+                <groupId>net.nicoulaj.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <algorithms>
+                        <algorithm>SHA-256</algorithm>
+                    </algorithms>
+                    <fileSets>
+                        <fileSet>
+                            <directory>${project.x.binaries}</directory>
+                            <excludes>
+                                <exclude>*.sha256</exclude>
+                            </excludes>
+                        </fileSet>
+                    </fileSets>
+                    <csvSummary>false</csvSummary>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <!-- Base build java8 -->
+        <profile>
+            <id>base-java8</id>
+            <activation>
+                <property>
+                    <name>!skipBaseJava8</name>
+                </property>
+            </activation>
+            <properties>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.source>1.8</maven.compiler.source>                
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.0</version>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>3.1.0</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- Enforce Java8 API -->
+        <profile>
+            <id>enforce-java8-api</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
+    </profiles>
     
     <repositories>
         <repository>
             <id>oss-jfrog-artifactory-releases</id>
             <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>oss-jfrog-artifactory-snapshots</id>
             <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 </project>
