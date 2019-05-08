@@ -246,7 +246,7 @@ project.properties.setProperty('project.x.fileversion', fileversion)
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.1.1</version>
                     </plugin>
                 </plugins>
             </build>
