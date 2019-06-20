@@ -23,12 +23,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  *
@@ -39,18 +39,18 @@ public class JFileChoosers {
 
     private final String IS_CLOSING_PROPERTY = "JFileChooserDialogIsClosingProperty";
 
-    public void autoPersistUserNodeForClass(@Nonnull JFileChooser fileChooser, @Nonnull Class<?> type) {
+    public void autoPersistUserNodeForClass(@NonNull JFileChooser fileChooser, @NonNull Class<?> type) {
         autoPersist(fileChooser, Preferences.userNodeForPackage(type).node(type.getSimpleName()));
     }
 
-    public void autoPersist(@Nonnull JFileChooser fileChooser, @Nonnull Preferences prefs) {
+    public void autoPersist(@NonNull JFileChooser fileChooser, @NonNull Preferences prefs) {
         Objects.requireNonNull(fileChooser);
         Objects.requireNonNull(prefs);
         loadCurrentDir(fileChooser, prefs);
         fileChooser.addPropertyChangeListener(IS_CLOSING_PROPERTY, event -> storeCurrentDir(fileChooser, prefs));
     }
 
-    public File getSelectedFileWithExtension(@Nonnull JFileChooser fileChooser) {
+    public File getSelectedFileWithExtension(@NonNull JFileChooser fileChooser) {
         File file = fileChooser.getSelectedFile();
         if (file != null) {
             FileFilter filter = fileChooser.getFileFilter();
@@ -64,17 +64,17 @@ public class JFileChoosers {
         return file;
     }
 
-    public boolean canOverride(@Nonnull File file, @Nullable Component parent) {
+    public boolean canOverride(@NonNull File file, @Nullable Component parent) {
         return !file.exists() || JOptionPane.showConfirmDialog(parent, "File exists already. Delete it anyway?", "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
-    public Optional<File> getOpenFile(@Nonnull JFileChooser fileChooser, @Nullable Component parent) {
+    public Optional<File> getOpenFile(@NonNull JFileChooser fileChooser, @Nullable Component parent) {
         return JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(parent)
                 ? Optional.of(fileChooser.getSelectedFile())
                 : Optional.empty();
     }
 
-    public Optional<File> getSaveFile(@Nonnull JFileChooser fileChooser, @Nullable Component parent) {
+    public Optional<File> getSaveFile(@NonNull JFileChooser fileChooser, @Nullable Component parent) {
         if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(parent)) {
             File result = getSelectedFileWithExtension(fileChooser);
             if (canOverride(result, parent)) {

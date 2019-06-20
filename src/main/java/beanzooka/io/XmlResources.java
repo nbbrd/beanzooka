@@ -29,12 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  *
@@ -43,8 +43,8 @@ import javax.xml.stream.XMLStreamWriter;
 @lombok.experimental.UtilityClass
 public class XmlResources {
 
-    @Nonnull
-    public Resources read(@Nonnull Path file) throws IOException, XMLStreamException {
+    @NonNull
+    public Resources read(@NonNull Path file) throws IOException, XMLStreamException {
         XMLInputFactory factory = XMLInputFactory.newFactory();
         try (Reader reader = Files.newBufferedReader(file)) {
             XMLStreamReader xml = factory.createXMLStreamReader(reader);
@@ -56,7 +56,7 @@ public class XmlResources {
         }
     }
 
-    public void write(@Nonnull Path file, @Nonnull Resources resources) throws IOException, XMLStreamException {
+    public void write(@NonNull Path file, @NonNull Resources resources) throws IOException, XMLStreamException {
         XMLOutputFactory factory = XMLOutputFactory.newFactory();
         try (Writer writer = Files.newBufferedWriter(file)) {
             XMLStreamWriter xml = factory.createXMLStreamWriter(writer);
