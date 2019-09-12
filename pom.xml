@@ -114,35 +114,19 @@
                 </configuration>
             </plugin>
             
-            <!-- Generates ${project.x.fileversion} from project version -->
+            <!-- Parse version into different properties -->
             <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.7.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <version>2.4.17</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>add-dynamic-properties</id>
-                        <phase>initialize</phase>
+                        <phase>validate</phase>
                         <goals>
-                            <goal>execute</goal>
+                            <goal>parse-version</goal>
                         </goals>
                         <configuration>
-                            <scripts>
-                                <script>
-                        <![CDATA[
-fileversion = "${project.version}".replace("-SNAPSHOT", "") + ".0"
-project.properties.setProperty('project.x.fileversion', fileversion)
-]]>
-                                </script>
-                            </scripts>
+                            <propertyPrefix>project.x</propertyPrefix>
                         </configuration>
                     </execution>
                 </executions>
@@ -173,22 +157,16 @@ project.properties.setProperty('project.x.fileversion', fileversion)
                                 <bundledJreAsFallback>true</bundledJreAsFallback>
                             </jre>
                             <versionInfo>
-                                <fileVersion>${project.x.fileversion}</fileVersion>
+                                <fileVersion>${project.x.majorVersion}.${project.x.minorVersion}.${project.x.incrementalVersion}.${project.x.buildNumber}</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <fileDescription>${project.description}</fileDescription>
                                 <copyright>${project.organization.name}</copyright>
-                                <productVersion>${project.x.fileversion}</productVersion>
+                                <productVersion>${project.x.majorVersion}.${project.x.minorVersion}.${project.x.incrementalVersion}.${project.x.buildNumber}</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
                                 <productName>${project.name}</productName>
                                 <internalName>${project.name}</internalName>
                                 <originalFilename>${project.name}.exe</originalFilename>
                             </versionInfo>
-                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
-                            <splash>
-                                <file>${project.basedir}/logo/beanzooka.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>60</timeout>
-                            </splash>
                         </configuration>
                     </execution>
                 </executions>
