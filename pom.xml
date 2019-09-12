@@ -169,6 +169,8 @@ project.properties.setProperty('project.x.fileversion', fileversion)
                             </classPath>
                             <jre>
                                 <minVersion>${maven.compiler.target}</minVersion>
+                                <path>%JAVA_HOME%</path>
+                                <bundledJreAsFallback>true</bundledJreAsFallback>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${project.x.fileversion}</fileVersion>
