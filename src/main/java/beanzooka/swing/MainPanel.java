@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -76,6 +78,22 @@ public final class MainPanel extends javax.swing.JPanel {
         return !sessions.isRunning() || JOptionPane.showConfirmDialog(MainPanel.this, "Some sessions are still running.\nDo you want to close the application anyway?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
+    public void open(File file) {
+        try {
+            resources.setResources(XmlResources.read(file.toPath()));
+        } catch (IOException | XMLStreamException ex) {
+            reportException(ex);
+        }
+    }
+
+    private static void reportException(Exception ex) {
+        StringWriter writer = new StringWriter();
+        ex.printStackTrace(new PrintWriter(writer));
+        JScrollPane message = new JScrollPane(new JTextArea(writer.toString()));
+        message.setPreferredSize(new Dimension(500, 300));
+        JOptionPane.showMessageDialog(null, message, ex.getClass().getSimpleName(), JOptionPane.ERROR_MESSAGE);
+    }
+
     private static abstract class CustomCommand extends JCommand<MainPanel> {
 
         public CustomCommand init(JButton button, MainPanel c, FontAwesome icon, String toolTip, String key) {
@@ -105,11 +123,7 @@ public final class MainPanel extends javax.swing.JPanel {
 
             @Override
             public void handleException(ActionEvent event, Exception ex) {
-                StringWriter writer = new StringWriter();
-                ex.printStackTrace(new PrintWriter(writer));
-                JScrollPane message = new JScrollPane(new JTextArea(writer.toString()));
-                message.setPreferredSize(new Dimension(500, 300));
-                JOptionPane.showMessageDialog(null, message, ex.getClass().getSimpleName(), JOptionPane.ERROR_MESSAGE);
+                reportException(ex);
             }
         }
     }
