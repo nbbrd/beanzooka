@@ -80,6 +80,7 @@ public class SwingUtil {
         JOptionPane pane = new JOptionPane(component, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, null, null);
 
         JDialog dialog = pane.createDialog(title);
+        dialog.setIconImages(SwingUtilities.getWindowAncestor(parent).getIconImages());
         dialog.setResizable(true);
         dialog.setSize(new Dimension(600, 400));
         dialog.setVisible(true);
