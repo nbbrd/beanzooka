@@ -310,7 +310,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                     .name("Edit plugins")
                     .valueFactory(Renderers::newPlugin)
                     .column("Label", String.class, Plugin::getLabel, Plugin::withLabel, Renderers.LABEL_DESCRIPTOR)
-                    .column("File", File.class, Plugin::getFile, Plugin::withFile, Renderers.FILE_DESCRIPTOR)
+                    .column("File", File.class, Plugin::getFile, Plugin::withFile, Renderers.PLUGIN_DESCRIPTOR)
                     .build();
 
     /**

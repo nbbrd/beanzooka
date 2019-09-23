@@ -28,7 +28,6 @@ import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
 import internal.swing.TableColumnDescriptor;
-import internal.swing.Converter;
 import internal.swing.JFileChoosers;
 import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
@@ -45,6 +44,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -63,7 +64,7 @@ class Renderers {
     final TableColumnDescriptor OPTIONS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.identity(), newOptionsField(), Renderers::onMoreOptions))
+                    .cellEditor(() -> TextCellEditor.of(o -> o, o -> o, newOptionsField(), Renderers::onMoreOptions))
                     .build();
 
     private final String OPTIONS_PROMPT = "options used by the launcher";
@@ -83,24 +84,36 @@ class Renderers {
         }
     }
 
+    private final FileFilter PLUGIN_FILTER = new FileNameExtensionFilter("NetBeans plugin", "nbm");
+
     final TableColumnDescriptor FILE_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFileField(), Renderers::onMoreFile))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(null), o -> Renderers.onMoreFile(o, null)))
                     .preferedWidth(300)
                     .build();
 
-    private JTextField newFileField() {
+    final TableColumnDescriptor PLUGIN_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(PLUGIN_FILTER::accept), o -> Renderers.onMoreFile(o, PLUGIN_FILTER)))
+                    .preferedWidth(300)
+                    .build();
+
+    private JTextField newFileField(java.io.FileFilter optionalFileFilter) {
         JTextField result = new JTextField();
         withPrompt("file path", result);
         JAutoCompletion completion = new JAutoCompletion(result);
-        completion.setSource(new FileAutoCompletionSource());
+        completion.setSource(new FileAutoCompletionSource(false, optionalFileFilter, new File[0]));
         completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
         return result;
     }
 
-    private void onMoreFile(JTextField textField) {
+    private void onMoreFile(JTextField textField, FileFilter optionalFileFilter) {
         JFileChooser result = new JFileChooser();
+        if (optionalFileFilter != null) {
+            result.setFileFilter(optionalFileFilter);
+        }
         result.setFileSelectionMode(JFileChooser.FILES_ONLY);
         result.setSelectedFile(new File(textField.getText()));
         JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
@@ -109,7 +122,7 @@ class Renderers {
     final TableColumnDescriptor CLUSTERS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(Jdk::fromFiles, Jdk::toFiles), newClustersField(), null))
+                    .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField()))
                     .build();
 
     private JTextField newClustersField() {
@@ -125,7 +138,7 @@ class Renderers {
     final TableColumnDescriptor FOLDER_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFolderField(), Renderers::onMoreFolder))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFolderField(), Renderers::onMoreFolder))
                     .preferedWidth(300)
                     .build();
 
