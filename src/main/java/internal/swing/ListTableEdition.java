@@ -16,6 +16,7 @@
  */
 package internal.swing;
 
+import ec.util.datatransfer.LocalDataTransfer;
 import ec.util.grid.swing.XTable;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.FontAwesome;
@@ -23,6 +24,8 @@ import ec.util.various.swing.JCommand;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.datatransfer.Transferable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -34,8 +37,10 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -43,6 +48,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.TransferHandler;
+import static javax.swing.TransferHandler.MOVE;
 
 /**
  *
@@ -171,6 +178,10 @@ public class ListTableEdition<ROW> {
             XTable table = new XTable();
             table.setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
 
+            table.setTransferHandler(new ListTableItemTransferHandler());
+            table.setDropMode(DropMode.INSERT);
+            table.setDragEnabled(true);
+
             ListTableModel<ROW> model = new ListTableModel<>();
             table.setModel(model);
             edition.getColumnHandlers().forEach(model.getColumns()::add);
@@ -264,6 +275,54 @@ public class ListTableEdition<ROW> {
             item.setText("Clear");
 
             return result;
+        }
+    }
+
+    private static final class ListTableItemTransferHandler extends TransferHandler {
+
+        private static final LocalDataTransfer<int[]> INT_ARRAY = LocalDataTransfer.of(int[].class);
+
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            return INT_ARRAY.createTransferable(((JTable) c).getSelectedRows());
+        }
+
+        @Override
+        public boolean canImport(TransferHandler.TransferSupport info) {
+            return info.isDrop() && INT_ARRAY.canImport(info);
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return MOVE;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean importData(TransferHandler.TransferSupport support) {
+            if (!canImport(support)) {
+                return false;
+            }
+            INT_ARRAY.getData(support)
+                    .ifPresent(o -> importData(o, (JTable) support.getComponent(), (JTable.DropLocation) support.getDropLocation()));
+            return true;
+        }
+
+        private void importData(int[] indices, JTable target, JTable.DropLocation dl) {
+            int index = dl.getRow();
+            if (indices[0] < index) {
+                index = index - indices.length;
+            }
+            move((ListTableModel) target.getModel(), (ListTableModel) target.getModel(), indices, index);
+            target.getSelectionModel().setSelectionInterval(index, index + indices.length - 1);
+        }
+
+        private static void move(ListTableModel from, ListTableModel to, int[] selection, int dropIndex) {
+            List reversedItems = new ArrayList(selection.length);
+            for (int i = selection.length - 1; i >= 0; i--) {
+                reversedItems.add(from.getRows().remove(selection[i]));
+            }
+            to.getRows().addAll(dropIndex, reversedItems);
         }
     }
 }
