@@ -50,6 +50,7 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.TransferHandler;
 import static javax.swing.TransferHandler.MOVE;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -120,6 +121,10 @@ public class ListTableEdition<ROW> {
         static <ROW> Bridge<ROW, JList<ROW>> list() {
             return of(Bridges::pushList, Bridges::pullList);
         }
+
+        static <ROW> Bridge<ROW, JTextComponent> text(Function<List<ROW>, String> forward, Function<String, List<ROW>> backward) {
+            return of((s, t) -> Bridges.pushText(s, t, backward), (s, t) -> Bridges.pullText(s, t, forward));
+        }
     }
 
     private static class Bridges {
@@ -161,6 +166,17 @@ public class ListTableEdition<ROW> {
             target.setModel(model);
 
             JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
+        }
+
+        private static <ROW> void pushText(JTextComponent source, JTable target, Function<String, List<ROW>> backward) {
+            ListTableModel<ROW> model = ((ListTableModel<ROW>) target.getModel());
+            model.getRows().clear();
+            model.getRows().addAll(backward.apply(source.getText()));
+        }
+
+        private static <ROW> void pullText(JTable source, JTextComponent target, Function<List<ROW>, String> forward) {
+            ListTableModel<ROW> model = ((ListTableModel<ROW>) source.getModel());
+            target.setText(forward.apply(model.getRows()));
         }
     }
 

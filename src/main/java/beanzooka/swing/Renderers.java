@@ -29,6 +29,7 @@ import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
 import internal.swing.TableColumnDescriptor;
 import internal.swing.JFileChoosers;
+import internal.swing.ListTableEdition;
 import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
 import java.awt.Color;
@@ -122,7 +123,7 @@ class Renderers {
     final TableColumnDescriptor CLUSTERS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
-                    .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField()))
+                    .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField(), Renderers::onMoreClusters))
                     .build();
 
     private JTextField newClustersField() {
@@ -133,6 +134,17 @@ class Renderers {
         completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
         completion.setSeparator(File.pathSeparator);
         return result;
+    }
+
+    private void onMoreClusters(JTextField textField) {
+        ListTableEdition
+                .<File>builder()
+                .name("Edit clusters")
+                .valueFactory(Renderers::newCluster)
+                .column("File", File.class, o -> o, (x, y) -> y, FOLDER_DESCRIPTOR)
+                .build()
+                .toAction(ListTableEdition.Bridge.text(Jdk::fromFiles, Jdk::toFiles), textField)
+                .actionPerformed(null);
     }
 
     final TableColumnDescriptor FOLDER_DESCRIPTOR
@@ -308,10 +320,18 @@ class Renderers {
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
+    public File newCluster() {
+        File folder = open(ClusterFile.class, JFileChooser.DIRECTORIES_ONLY);
+        return folder != null ? folder : EMPTY_FILE;
+    }
+
     private void withPrompt(String text, JTextComponent component) {
         TextPrompt prompt = new TextPrompt(text, component);
         StandardSwingColor.TEXT_FIELD_INACTIVE_FOREGROUND.lookup().ifPresent(prompt::setForeground);
         prompt.setVerticalAlignment(JLabel.CENTER);
         prompt.setHorizontalAlignment(JLabel.CENTER);
+    }
+
+    private static final class ClusterFile {
     }
 }
