@@ -29,6 +29,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
@@ -58,6 +59,9 @@ public class ListTableEdition<ROW> {
     @lombok.NonNull
     private final Supplier<ROW> valueFactory;
 
+    @lombok.NonNull
+    private final UnaryOperator<ROW> valueDuplicator;
+
     @lombok.Singular
     private final List<ListTableModel.Column<ROW, Object>> columnHandlers;
 
@@ -66,6 +70,11 @@ public class ListTableEdition<ROW> {
 
     public <C extends Component> Action toAction(Bridge<ROW, C> bridge, C component) {
         return new EditCommand<>(this, bridge).toAction(component);
+    }
+
+    public static <ROW> Builder<ROW> builder() {
+        return new Builder<ROW>()
+                .valueDuplicator(UnaryOperator.identity());
     }
 
     public static class Builder<ROW> {
@@ -169,7 +178,7 @@ public class ListTableEdition<ROW> {
 
             bridge.push(component, table);
 
-            if (show(component, table, edition.getValueFactory(), edition.getName())) {
+            if (show(component, table, edition.getValueFactory(), edition.getValueDuplicator(), edition.getName())) {
                 bridge.pull(table, component);
             }
         }
@@ -181,13 +190,14 @@ public class ListTableEdition<ROW> {
             return result;
         }
 
-        private static boolean show(Component parent, JTable table, Supplier<?> valueFactory, String title) {
+        private static boolean show(Component parent, JTable table, Supplier<?> valueFactory, UnaryOperator<?> valueDuplicator, String title) {
             JPanel panel = new JPanel(new BorderLayout());
-            panel.getActionMap().put(ListTable.ADD_ACTION, ListTable.newAddAction(table, valueFactory));
-            panel.getActionMap().put(ListTable.REMOVE_ACTION, ListTable.newRemoveAction(table));
-            panel.getActionMap().put(ListTable.CLEAR_ACTION, ListTable.newClearAction(table));
-            panel.getActionMap().put(ListTable.MOVE_UP_ACTION, ListTable.newMoveUpAction(table));
-            panel.getActionMap().put(ListTable.MOVE_DOWN_ACTION, ListTable.newMoveDownAction(table));
+            panel.getActionMap().put(ListTableActions.ADD_ACTION, ListTableActions.newAddAction(table, valueFactory));
+            panel.getActionMap().put(ListTableActions.DUPLICATE_ACTION, ListTableActions.newDuplicateAction(table, valueDuplicator));
+            panel.getActionMap().put(ListTableActions.REMOVE_ACTION, ListTableActions.newRemoveAction(table));
+            panel.getActionMap().put(ListTableActions.CLEAR_ACTION, ListTableActions.newClearAction(table));
+            panel.getActionMap().put(ListTableActions.MOVE_UP_ACTION, ListTableActions.newMoveUpAction(table));
+            panel.getActionMap().put(ListTableActions.MOVE_DOWN_ACTION, ListTableActions.newMoveDownAction(table));
 
             table.setComponentPopupMenu(createMenu(panel.getActionMap()).getPopupMenu());
 
@@ -203,27 +213,32 @@ public class ListTableEdition<ROW> {
 
             JButton item;
 
-            item = result.add(am.get(ListTable.ADD_ACTION));
+            item = result.add(am.get(ListTableActions.ADD_ACTION));
             item.setText(null);
             item.setToolTipText("Add");
             item.setIcon(FontAwesome.FA_PLUS.getIcon(Color.DARK_GRAY, 14f));
 
-            item = result.add(am.get(ListTable.REMOVE_ACTION));
+            item = result.add(am.get(ListTableActions.DUPLICATE_ACTION));
+            item.setText(null);
+            item.setToolTipText("Duplicate");
+            item.setIcon(FontAwesome.FA_PLUS_SQUARE.getIcon(Color.DARK_GRAY, 14f));
+
+            item = result.add(am.get(ListTableActions.REMOVE_ACTION));
             item.setText(null);
             item.setToolTipText("Remove");
             item.setIcon(FontAwesome.FA_MINUS.getIcon(Color.DARK_GRAY, 14f));
 
-            item = result.add(am.get(ListTable.CLEAR_ACTION));
+            item = result.add(am.get(ListTableActions.CLEAR_ACTION));
             item.setText(null);
             item.setToolTipText("Clear");
             item.setIcon(FontAwesome.FA_TIMES.getIcon(Color.DARK_GRAY, 14f));
 
-            item = result.add(am.get(ListTable.MOVE_UP_ACTION));
+            item = result.add(am.get(ListTableActions.MOVE_UP_ACTION));
             item.setText(null);
             item.setToolTipText("Move up");
             item.setIcon(FontAwesome.FA_ARROW_UP.getIcon(Color.DARK_GRAY, 14f));
 
-            item = result.add(am.get(ListTable.MOVE_DOWN_ACTION));
+            item = result.add(am.get(ListTableActions.MOVE_DOWN_ACTION));
             item.setText(null);
             item.setToolTipText("Move down");
             item.setIcon(FontAwesome.FA_ARROW_DOWN.getIcon(Color.DARK_GRAY, 14f));
@@ -236,13 +251,16 @@ public class ListTableEdition<ROW> {
 
             JMenuItem item;
 
-            item = result.add(am.get(ListTable.ADD_ACTION));
+            item = result.add(am.get(ListTableActions.ADD_ACTION));
             item.setText("Add");
 
-            item = result.add(am.get(ListTable.REMOVE_ACTION));
+            item = result.add(am.get(ListTableActions.DUPLICATE_ACTION));
+            item.setText("Duplicate");
+
+            item = result.add(am.get(ListTableActions.REMOVE_ACTION));
             item.setText("Remove");
 
-            item = result.add(am.get(ListTable.CLEAR_ACTION));
+            item = result.add(am.get(ListTableActions.CLEAR_ACTION));
             item.setText("Clear");
 
             return result;

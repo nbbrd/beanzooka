@@ -18,7 +18,9 @@ package internal.swing;
 
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import javax.swing.Action;
 import javax.swing.JTable;
 
@@ -27,16 +29,21 @@ import javax.swing.JTable;
  * @author Philippe Charles
  */
 @lombok.experimental.UtilityClass
-public class ListTable {
+public class ListTableActions {
 
     public final String ADD_ACTION = "add";
+    public final String DUPLICATE_ACTION = "duplicate";
     public final String REMOVE_ACTION = "remove";
     public final String CLEAR_ACTION = "clear";
     public final String MOVE_UP_ACTION = "moveUp";
     public final String MOVE_DOWN_ACTION = "moveDown";
 
-    public <ROW> Action newAddAction(JTable table, Supplier<ROW> valueSupplier) {
-        return new AddCommand<>(valueSupplier).toAction(table);
+    public <ROW> Action newAddAction(JTable table, Supplier<ROW> valueFactory) {
+        return new AddCommand<>(valueFactory).toAction(table);
+    }
+
+    public <ROW> Action newDuplicateAction(JTable table, UnaryOperator<ROW> valueDuplicator) {
+        return new DuplicateCommand<>(valueDuplicator).toAction(table);
     }
 
     public Action newRemoveAction(JTable table) {
@@ -82,6 +89,34 @@ public class ListTable {
         @Override
         public void execute(JTable component) throws Exception {
             getModel(component).getRows().add(valueSupplier.get());
+        }
+    }
+
+    @lombok.RequiredArgsConstructor
+    private static final class DuplicateCommand<ROW> extends ListTableCommand<ROW> {
+
+        @lombok.NonNull
+        private final UnaryOperator<ROW> valueDuplicator;
+
+        @Override
+        public boolean isEnabled(JTable component) {
+            return super.isEnabled(component)
+                    && !component.getSelectionModel().isSelectionEmpty();
+        }
+
+        @Override
+        public void execute(JTable component) throws Exception {
+            int[] selection = JLists.getSelectionIndexStream(component.getSelectionModel()).toArray();
+            for (int i = 0; i < selection.length; i++) {
+                List<ROW> rows = getModel(component).getRows();
+                rows.add(valueDuplicator.apply(rows.get(selection[i])));
+            }
+        }
+
+        @Override
+        public ActionAdapter toAction(JTable component) {
+            return super.toAction(component)
+                    .withWeakListSelectionListener(component.getSelectionModel());
         }
     }
 
