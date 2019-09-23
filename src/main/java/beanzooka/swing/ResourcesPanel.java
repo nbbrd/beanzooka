@@ -25,6 +25,7 @@ import beanzooka.core.UserDir;
 import internal.swing.SwingUtil;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
+import internal.swing.CopyPathCommand;
 import internal.swing.ListTableEdition;
 import internal.swing.EventShield;
 import internal.swing.ShowInFolderCommand;
@@ -35,9 +36,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -58,6 +61,10 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     public static final String EDIT_JDKS_ACTION = "editJdks";
     public static final String EDIT_USER_DIRS_ACTION = "editUserDirs";
     public static final String EDIT_PLUGINS_ACTION = "editPlugins";
+    public static final String COPY_PATH_APPS_ACTION = "copyPathApps";
+    public static final String COPY_PATH_JDKS_ACTION = "copyPathJdks";
+    public static final String COPY_PATH_USER_DIRS_ACTION = "copyPathUserDirs";
+    public static final String COPY_PATH_PLUGINS_ACTION = "copyPathPlugins";
 
     private final EventShield shield;
     private Resources resources;
@@ -92,30 +99,37 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     private void initComponents2() {
         OpenPluginLocation openPlugin = new OpenPluginLocation();
         SwingUtil.onDoubleClick(plugins, openPlugin);
+
         getActionMap().put(OPEN_PLUGIN_ACTION, openPlugin.toAction(plugins));
+
         getActionMap().put(EDIT_APPS_ACTION, APPS.toAction(ListTableEdition.Bridge.comboBox(), apps));
         getActionMap().put(EDIT_JDKS_ACTION, JDKS.toAction(ListTableEdition.Bridge.comboBox(), jdks));
         getActionMap().put(EDIT_USER_DIRS_ACTION, USER_DIRS.toAction(ListTableEdition.Bridge.comboBox(), userDirs));
         getActionMap().put(EDIT_PLUGINS_ACTION, PLUGINS.toAction(ListTableEdition.Bridge.list(), plugins));
 
+        getActionMap().put(COPY_PATH_APPS_ACTION, new ComboCopyPath<>(App::getFile).toAction(apps));
+        getActionMap().put(COPY_PATH_JDKS_ACTION, new ComboCopyPath<>(Jdk::getJavaHome).toAction(jdks));
+        getActionMap().put(COPY_PATH_USER_DIRS_ACTION, new ComboCopyPath<>(UserDir::getFolder).toAction(userDirs));
+        getActionMap().put(COPY_PATH_PLUGINS_ACTION, new ListCopyPath<>(Plugin::getFile).toAction(plugins));
+
         apps.setRenderer(JLists.cellRendererOf(Renderers::renderApp));
         apps.addItemListener(shield.wrap(this::onAppsSelectionChange));
-        apps.setComponentPopupMenu(getPopupMenu(EDIT_APPS_ACTION));
+        apps.setComponentPopupMenu(getPopupMenu(EDIT_APPS_ACTION, COPY_PATH_APPS_ACTION));
         SwingUtil.addListDataListener(apps, SwingUtil.listDataListenerOf(this::onAppsDataChange));
 
         jdks.setRenderer(JLists.cellRendererOf(Renderers::renderJdk));
         jdks.addItemListener(shield.wrap(this::onJdksSelectionChange));
-        jdks.setComponentPopupMenu(getPopupMenu(EDIT_JDKS_ACTION));
+        jdks.setComponentPopupMenu(getPopupMenu(EDIT_JDKS_ACTION, COPY_PATH_JDKS_ACTION));
         SwingUtil.addListDataListener(jdks, SwingUtil.listDataListenerOf(this::onJdksDataChange));
 
         userDirs.setRenderer(JLists.cellRendererOf(Renderers::renderUserDir));
         userDirs.addItemListener(shield.wrap(this::onUserDirsSelectionChange));
-        userDirs.setComponentPopupMenu(getPopupMenu(EDIT_USER_DIRS_ACTION));
+        userDirs.setComponentPopupMenu(getPopupMenu(EDIT_USER_DIRS_ACTION, COPY_PATH_USER_DIRS_ACTION));
         SwingUtil.addListDataListener(userDirs, SwingUtil.listDataListenerOf(this::onUserDirsDataChange));
 
         plugins.setCellRenderer(JLists.cellRendererOf(Renderers::renderPlugin));
         plugins.addListSelectionListener(shield.wrap(this::onPluginsSelectionChange));
-        plugins.setComponentPopupMenu(getPopupMenu(EDIT_PLUGINS_ACTION, OPEN_PLUGIN_ACTION));
+        plugins.setComponentPopupMenu(getPopupMenu(EDIT_PLUGINS_ACTION, OPEN_PLUGIN_ACTION, COPY_PATH_PLUGINS_ACTION));
         SwingUtil.addListDataListener(plugins, SwingUtil.listDataListenerOf(this::onPluginsDataChange));
 
         tempUserDir.addPropertyChangeListener("BUTTON.BP_CHECKBOX", event -> updateConfiguration());
@@ -219,6 +233,47 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         public JCommand.ActionAdapter toAction(JList<Plugin> c) {
             ActionAdapter result = super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
             result.putValue(Action.NAME, "Open plugin location");
+            return result;
+        }
+    }
+
+    @lombok.AllArgsConstructor
+    private static final class ComboCopyPath<T> extends CopyPathCommand<JComboBox<T>> {
+
+        private final Function<T, File> toFile;
+
+        @Override
+        protected Optional<File> getFile(JComboBox<T> component) {
+            return component.getSelectedIndex() != -1
+                    ? Optional.ofNullable(toFile.apply((T) component.getSelectedItem()))
+                    : Optional.empty();
+        }
+
+        @Override
+        public JCommand.ActionAdapter toAction(JComboBox<T> c) {
+            ActionAdapter result = super.toAction(c);
+            SwingUtil.addListDataListener(c, SwingUtil.listDataListenerOf(o -> result.refreshActionState()));
+            result.putValue(Action.NAME, "Copy path");
+            return result;
+        }
+    }
+
+    @lombok.AllArgsConstructor
+    private static final class ListCopyPath<T> extends CopyPathCommand<JList<T>> {
+
+        private final Function<T, File> toFile;
+
+        @Override
+        protected Optional<File> getFile(JList<T> component) {
+            return JLists.isSingleSelectionIndex(component.getSelectionModel())
+                    ? Optional.ofNullable(toFile.apply(component.getSelectedValue()))
+                    : Optional.empty();
+        }
+
+        @Override
+        public JCommand.ActionAdapter toAction(JList<T> c) {
+            ActionAdapter result = super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
+            result.putValue(Action.NAME, "Copy path");
             return result;
         }
     }
