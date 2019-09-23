@@ -29,6 +29,7 @@ import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
 import internal.swing.TableColumnDescriptor;
 import internal.swing.JFileChoosers;
+import internal.swing.ListTableDescriptor;
 import internal.swing.ListTableEdition;
 import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
@@ -137,14 +138,11 @@ class Renderers {
     }
 
     private void onMoreClusters(JTextField textField) {
-        ListTableEdition
-                .<File>builder()
-                .name("Edit clusters")
-                .valueFactory(Renderers::newCluster)
+        ListTableDescriptor<File> listTable = ListTableDescriptor
+                .builder(Renderers::newCluster)
                 .column("File", File.class, o -> o, (x, y) -> y, FOLDER_DESCRIPTOR)
-                .build()
-                .toAction(ListTableEdition.Bridge.text(Jdk::fromFiles, Jdk::toFiles), textField)
-                .actionPerformed(null);
+                .build();
+        ListTableEdition.ofText("Edit clusters", listTable, Jdk::fromFiles, Jdk::toFiles).edit(textField);
     }
 
     final TableColumnDescriptor FOLDER_DESCRIPTOR

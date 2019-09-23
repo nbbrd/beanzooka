@@ -28,6 +28,7 @@ import ec.util.various.swing.JCommand;
 import internal.swing.CopyPathCommand;
 import internal.swing.ListTableEdition;
 import internal.swing.EventShield;
+import internal.swing.ListTableDescriptor;
 import internal.swing.ShowInFolderCommand;
 import internal.swing.TableColumnDescriptor;
 import java.awt.event.ItemEvent;
@@ -102,10 +103,10 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
         getActionMap().put(OPEN_PLUGIN_ACTION, openPlugin.toAction(plugins));
 
-        getActionMap().put(EDIT_APPS_ACTION, APPS.toAction(ListTableEdition.Bridge.comboBox(), apps));
-        getActionMap().put(EDIT_JDKS_ACTION, JDKS.toAction(ListTableEdition.Bridge.comboBox(), jdks));
-        getActionMap().put(EDIT_USER_DIRS_ACTION, USER_DIRS.toAction(ListTableEdition.Bridge.comboBox(), userDirs));
-        getActionMap().put(EDIT_PLUGINS_ACTION, PLUGINS.toAction(ListTableEdition.Bridge.list(), plugins));
+        getActionMap().put(EDIT_APPS_ACTION, ListTableEdition.ofComboBox("Edit applications", APPS).toAction(apps));
+        getActionMap().put(EDIT_JDKS_ACTION, ListTableEdition.ofComboBox("Edit JDKs", JDKS).toAction(jdks));
+        getActionMap().put(EDIT_USER_DIRS_ACTION, ListTableEdition.ofComboBox("Edit user dirs", USER_DIRS).toAction(userDirs));
+        getActionMap().put(EDIT_PLUGINS_ACTION, ListTableEdition.ofList("Edit plugins", PLUGINS).toAction(plugins));
 
         getActionMap().put(COPY_PATH_APPS_ACTION, new ComboCopyPath<>(App::getFile).toAction(apps));
         getActionMap().put(COPY_PATH_JDKS_ACTION, new ComboCopyPath<>(Jdk::getJavaHome).toAction(jdks));
@@ -278,37 +279,33 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         }
     }
 
-    private static final ListTableEdition<App> APPS
-            = ListTableEdition.<App>builder()
-                    .name("Edit applications")
-                    .valueFactory(Renderers::newApp)
+    private static final ListTableDescriptor<App> APPS
+            = ListTableDescriptor
+                    .builder(Renderers::newApp)
                     .column("Label", String.class, App::getLabel, App::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("File", File.class, App::getFile, App::withFile, Renderers.FILE_DESCRIPTOR)
                     .build();
 
-    private static final ListTableEdition<Jdk> JDKS
-            = ListTableEdition.<Jdk>builder()
-                    .name("Edit JDKs")
-                    .valueFactory(Renderers::newJdk)
+    private static final ListTableDescriptor<Jdk> JDKS
+            = ListTableDescriptor
+                    .builder(Renderers::newJdk)
                     .column("Label", String.class, Jdk::getLabel, Jdk::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("Java home", File.class, Jdk::getJavaHome, Jdk::withJavaHome, Renderers.FOLDER_DESCRIPTOR)
                     .column("Options", String.class, Jdk::getOptions, Jdk::withOptions, Renderers.OPTIONS_DESCRIPTOR)
                     .column("Clusters", List.class, Jdk::getClusters, Jdk::withClusters, Renderers.CLUSTERS_DESCRIPTOR)
                     .build();
 
-    private static final ListTableEdition<UserDir> USER_DIRS
-            = ListTableEdition.<UserDir>builder()
-                    .name("Edit user dirs")
-                    .valueFactory(Renderers::newUserDir)
+    private static final ListTableDescriptor<UserDir> USER_DIRS
+            = ListTableDescriptor
+                    .builder(Renderers::newUserDir)
                     .column("Label", String.class, UserDir::getLabel, UserDir::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("Folder", File.class, UserDir::getFolder, UserDir::withFolder, Renderers.FOLDER_DESCRIPTOR)
                     .column("Clone", Boolean.class, UserDir::isClone, UserDir::withClone, TableColumnDescriptor.EMPTY)
                     .build();
 
-    private static final ListTableEdition<Plugin> PLUGINS
-            = ListTableEdition.<Plugin>builder()
-                    .name("Edit plugins")
-                    .valueFactory(Renderers::newPlugin)
+    private static final ListTableDescriptor<Plugin> PLUGINS
+            = ListTableDescriptor
+                    .builder(Renderers::newPlugin)
                     .column("Label", String.class, Plugin::getLabel, Plugin::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("File", File.class, Plugin::getFile, Plugin::withFile, Renderers.PLUGIN_DESCRIPTOR)
                     .build();
