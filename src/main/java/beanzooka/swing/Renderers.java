@@ -277,8 +277,11 @@ class Renderers {
         return FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f);
     }
 
-    private File open(Class<?> id, int fileSelectionMode) {
+    private File open(Class<?> id, int fileSelectionMode, FileFilter optionalFileFilter) {
         JFileChooser fileChooser = new JFileChooser();
+        if (optionalFileFilter != null) {
+            fileChooser.setFileFilter(optionalFileFilter);
+        }
         JFileChoosers.autoPersist(fileChooser, Preferences.userNodeForPackage(id).node(id.getSimpleName()));
         fileChooser.setFileSelectionMode(fileSelectionMode);
         return JFileChoosers.getOpenFile(fileChooser, null).orElse(null);
@@ -291,35 +294,35 @@ class Renderers {
     }
 
     public App newApp() {
-        File file = open(App.class, JFileChooser.FILES_ONLY);
+        File file = open(App.class, JFileChooser.FILES_ONLY, null);
         return file != null
                 ? App.builder().label(file.getName()).file(file).build()
                 : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
     public Jdk newJdk() {
-        File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY);
+        File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
                 ? Jdk.builder().label(folder.getName()).javaHome(folder).build()
                 : Jdk.builder().label(randomLabel()).javaHome(EMPTY_FILE).build();
     }
 
     public UserDir newUserDir() {
-        File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY);
+        File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
                 ? UserDir.builder().label(folder.getName()).folder(folder).build()
                 : UserDir.builder().label(randomLabel()).folder(EMPTY_FILE).build();
     }
 
     public Plugin newPlugin() {
-        File file = open(Plugin.class, JFileChooser.FILES_ONLY);
+        File file = open(Plugin.class, JFileChooser.FILES_ONLY, PLUGIN_FILTER);
         return file != null
                 ? Plugin.builder().label(file.getName()).file(file).build()
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
     public File newCluster() {
-        File folder = open(ClusterFile.class, JFileChooser.DIRECTORIES_ONLY);
+        File folder = open(ClusterFile.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null ? folder : EMPTY_FILE;
     }
 
