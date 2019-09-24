@@ -167,6 +167,12 @@
                                 <internalName>${project.name}</internalName>
                                 <originalFilename>${project.name}.exe</originalFilename>
                             </versionInfo>
+                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
+                            <splash>
+                                <file>${project.basedir}/logo/beanzooka.bmp</file>
+                                <waitForWindow>true</waitForWindow>
+                                <timeout>60</timeout>
+                            </splash>
                         </configuration>
                     </execution>
                 </executions>
