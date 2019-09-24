@@ -117,6 +117,11 @@ public class ListTableEdition<ROW, C extends Component> {
         item.setToolTipText("Duplicate");
         item.setIcon(FontAwesome.FA_PLUS_SQUARE.getIcon(Color.DARK_GRAY, 14f));
 
+        item = result.add(am.get(ListTableActions.FILL_ACTION));
+        item.setText(null);
+        item.setToolTipText("Auto fill");
+        item.setIcon(FontAwesome.FA_MAGIC.getIcon(Color.DARK_GRAY, 14f));
+
         item = result.add(am.get(ListTableActions.REMOVE_ACTION));
         item.setText(null);
         item.setToolTipText("Remove");

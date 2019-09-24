@@ -21,7 +21,9 @@ import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -49,6 +51,11 @@ public class ListTableDescriptor<ROW> {
     @lombok.NonNull
     private final UnaryOperator<ROW> valueDuplicator;
 
+    @lombok.NonNull
+    private final Consumer<List<ROW>> valueFiller;
+
+    private final boolean enableFiller;
+
     @lombok.Singular
     private final List<ListTableModel.Column<ROW, Object>> columnHandlers;
 
@@ -68,6 +75,7 @@ public class ListTableDescriptor<ROW> {
         ActionMap am = table.getActionMap();
         am.put(ListTableActions.ADD_ACTION, ListTableActions.newAddAction(table, valueFactory));
         am.put(ListTableActions.DUPLICATE_ACTION, ListTableActions.newDuplicateAction(table, valueDuplicator));
+        am.put(ListTableActions.FILL_ACTION, ListTableActions.newFillAction(table, valueFiller, enableFiller));
         am.put(ListTableActions.REMOVE_ACTION, ListTableActions.newRemoveAction(table));
         am.put(ListTableActions.CLEAR_ACTION, ListTableActions.newClearAction(table));
         am.put(ListTableActions.MOVE_UP_ACTION, ListTableActions.newMoveUpAction(table));
@@ -83,7 +91,8 @@ public class ListTableDescriptor<ROW> {
     // Set default values and enforce non-null items
     private static <ROW> Builder<ROW> builder() {
         return new Builder<ROW>()
-                .valueDuplicator(UnaryOperator.identity());
+                .valueDuplicator(UnaryOperator.identity())
+                .valueFiller(Objects::isNull); // do nothing
     }
 
     public static class Builder<ROW> {
@@ -105,6 +114,9 @@ public class ListTableDescriptor<ROW> {
 
         item = result.add(am.get(ListTableActions.DUPLICATE_ACTION));
         item.setText("Duplicate");
+
+        item = result.add(am.get(ListTableActions.FILL_ACTION));
+        item.setText("Auto fill");
 
         item = result.add(am.get(ListTableActions.REMOVE_ACTION));
         item.setText("Remove");

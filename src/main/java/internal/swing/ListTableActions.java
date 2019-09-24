@@ -19,6 +19,7 @@ package internal.swing;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import javax.swing.Action;
@@ -33,6 +34,7 @@ public class ListTableActions {
 
     public final String ADD_ACTION = "add";
     public final String DUPLICATE_ACTION = "duplicate";
+    public final String FILL_ACTION = "fill";
     public final String REMOVE_ACTION = "remove";
     public final String CLEAR_ACTION = "clear";
     public final String MOVE_UP_ACTION = "moveUp";
@@ -44,6 +46,10 @@ public class ListTableActions {
 
     public <ROW> Action newDuplicateAction(JTable table, UnaryOperator<ROW> valueDuplicator) {
         return new DuplicateCommand<>(valueDuplicator).toAction(table);
+    }
+
+    public <ROW> Action newFillAction(JTable table, Consumer<List<ROW>> valueFiller, boolean enableFiller) {
+        return new FillCommand<>(valueFiller, enableFiller).toAction(table);
     }
 
     public Action newRemoveAction(JTable table) {
@@ -117,6 +123,24 @@ public class ListTableActions {
         public ActionAdapter toAction(JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
+        }
+    }
+
+    @lombok.RequiredArgsConstructor
+    private static final class FillCommand<ROW> extends ListTableCommand<ROW> {
+
+        @lombok.NonNull
+        private final Consumer<List<ROW>> valueFiller;
+        private final boolean enableFiller;
+
+        @Override
+        public boolean isEnabled(JTable component) {
+            return enableFiller;
+        }
+
+        @Override
+        public void execute(JTable component) throws Exception {
+            valueFiller.accept(getModel(component).getRows());
         }
     }
 

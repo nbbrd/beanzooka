@@ -289,6 +289,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     private static final ListTableDescriptor<Jdk> JDKS
             = ListTableDescriptor
                     .builder(Renderers::newJdk)
+                    .valueFiller(Renderers::fillJdk)
+                    .enableFiller(true)
                     .column("Label", String.class, Jdk::getLabel, Jdk::withLabel, Renderers.LABEL_DESCRIPTOR)
                     .column("Java home", File.class, Jdk::getJavaHome, Jdk::withJavaHome, Renderers.FOLDER_DESCRIPTOR)
                     .column("Options", String.class, Jdk::getOptions, Jdk::withOptions, Renderers.OPTIONS_DESCRIPTOR)

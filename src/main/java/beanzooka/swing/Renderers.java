@@ -307,6 +307,13 @@ class Renderers {
                 : Jdk.builder().label(randomLabel()).javaHome(EMPTY_FILE).build();
     }
 
+    public void fillJdk(List<Jdk> list) {
+        String javaHome = System.getProperty("java.home");
+        if (javaHome != null && list.stream().noneMatch(jdk -> jdk.getJavaHome().toString().equalsIgnoreCase(javaHome))) {
+            list.add(Jdk.builder().label("java home").javaHome(new File(javaHome)).build());
+        }
+    }
+
     public UserDir newUserDir() {
         File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
