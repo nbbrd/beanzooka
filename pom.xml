@@ -25,6 +25,7 @@
     <properties>
         <project.x.mainClass>beanzooka.Beanzooka</project.x.mainClass>
         <project.x.binaries>${project.build.directory}/binaries</project.x.binaries>
+        <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
         <project.x.headerType>gui</project.x.headerType>
         <java-desktop-util.version>2.2.3-SNAPSHOT</java-desktop-util.version>
     </properties>
@@ -74,7 +75,7 @@
     
     <build>
         <plugins>
-            <!-- Put project version in manifest in order to make it available at runtime -->
+            <!-- Generates manifest for executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -83,7 +84,11 @@
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <mainClass>${project.x.mainClass}</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <SplashScreen-Image>${project.x.splash}</SplashScreen-Image>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -104,9 +109,7 @@
                 <configuration>
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>${project.x.mainClass}</mainClass>
-                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"/>
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>
@@ -148,9 +151,6 @@
                             <outfile>${project.x.binaries}/${project.build.finalName}.exe</outfile>
                             <jar>${project.x.binaries}/${project.build.finalName}-bin.jar</jar>
                             <downloadUrl>https://adoptopenjdk.net/</downloadUrl>
-                            <classPath>
-                                <mainClass>${project.x.mainClass}</mainClass>
-                            </classPath>
                             <jre>
                                 <minVersion>${maven.compiler.target}</minVersion>
                                 <path>%JAVA_HOME%</path>
@@ -168,11 +168,6 @@
                                 <originalFilename>${project.name}.exe</originalFilename>
                             </versionInfo>
                             <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
-                            <splash>
-                                <file>${project.basedir}/logo/beanzooka.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>60</timeout>
-                            </splash>
                         </configuration>
                     </execution>
                 </executions>
