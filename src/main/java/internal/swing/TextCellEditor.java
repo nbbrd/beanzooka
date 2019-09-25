@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Insets;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -32,28 +33,31 @@ import javax.swing.border.LineBorder;
 /**
  *
  * @author Philippe Charles
- * @param <T>
  */
-public final class TextCellEditor<T> extends DefaultCellEditor {
+public final class TextCellEditor extends DefaultCellEditor {
+
+    public static <T> TextCellEditor of(Function<T, String> forward, Function<String, T> backward, JTextField textField) {
+        return new TextCellEditor(forward, backward, textField, null);
+    }
+
+    public static <T> TextCellEditor of(Function<T, String> forward, Function<String, T> backward, JTextField textField, Consumer<JTextField> onMoreAction) {
+        return new TextCellEditor(forward, backward, textField, onMoreAction);
+    }
 
     private final JPanel customComponent;
 
-    public TextCellEditor(Converter<T, String> converter, Consumer<JTextField> onMoreAction) {
-        this(converter, new JTextField(), onMoreAction);
-    }
-
-    public TextCellEditor(Converter<T, String> converter, JTextField textField, Consumer<JTextField> onMoreAction) {
+    private TextCellEditor(Function forward, Function backward, JTextField textField, Consumer<JTextField> onMoreAction) {
         super(textField);
         this.customComponent = new JPanel(new BorderLayout());
         this.delegate = new EditorDelegate() {
             @Override
             public void setValue(Object value) {
-                textField.setText(value != null ? converter.applyForward((T) value) : "");
+                textField.setText(value != null ? (String) forward.apply(value) : "");
             }
 
             @Override
             public Object getCellEditorValue() {
-                return converter.applyBackward(textField.getText());
+                return backward.apply(textField.getText());
             }
         };
 

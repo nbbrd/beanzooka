@@ -24,228 +24,186 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.ListModel;
+import javax.swing.text.JTextComponent;
 
 /**
  *
  * @author Philippe Charles
  * @param <ROW>
+ * @param <C>
  */
-@lombok.Getter
-@lombok.Builder(builderClassName = "Builder")
-public class ListTableEdition<ROW> {
+@lombok.RequiredArgsConstructor
+public class ListTableEdition<ROW, C extends Component> {
+
+    public static <ROW> ListTableEdition<ROW, JList<ROW>> ofList(String name, ListTableDescriptor<ROW> listTable) {
+        return new ListTableEdition<>(name, listTable, ListTableEdition::pushList, ListTableEdition::pullList);
+    }
+
+    public static <ROW> ListTableEdition<ROW, JComboBox<ROW>> ofComboBox(String name, ListTableDescriptor<ROW> listTable) {
+        return new ListTableEdition<>(name, listTable, ListTableEdition::pushComboBox, ListTableEdition::pullComboBox);
+    }
+
+    public static <ROW> ListTableEdition<ROW, JTextComponent> ofText(String name, ListTableDescriptor<ROW> listTable, Function<List<ROW>, String> forward, Function<String, List<ROW>> backward) {
+        return new ListTableEdition<>(name, listTable, (s, t) -> pushText(s, t, backward), (s, t) -> pullText(s, t, forward));
+    }
 
     @lombok.NonNull
     private final String name;
 
     @lombok.NonNull
-    private final Supplier<ROW> valueFactory;
+    private final ListTableDescriptor<ROW> listTable;
 
-    @lombok.Singular
-    private final List<ListTableModel.Column<ROW, Object>> columnHandlers;
+    @lombok.NonNull
+    private final BiConsumer<C, JTable> push;
 
-    @lombok.Singular
-    private final Map<Object, TableColumnDescriptor> columnDescriptors;
+    @lombok.NonNull
+    private final BiConsumer<JTable, C> pull;
 
-    public <C extends Component> Action toAction(Bridge<ROW, C> bridge, C component) {
-        return new EditCommand<>(this, bridge).toAction(component);
-    }
+    public void edit(C component) {
+        XTable table = new XTable();
+        table.setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
 
-    public static class Builder<ROW> {
+        listTable.apply(table);
 
-        public <CELL> Builder<ROW> column(String name, Class<CELL> type, Function<ROW, CELL> extractor, BiFunction<ROW, CELL, ROW> updater, TableColumnDescriptor descriptor) {
-            columnHandler(new ListTableModel.Column(name, type, Accessor.of(extractor, updater)));
-            columnDescriptor(name, descriptor);
-            return this;
+        push.accept(component, table);
+        if (show(component, table, name)) {
+            pull.accept(table, component);
         }
     }
 
-    public interface Bridge<ROW, C extends Component> {
+    public Action toAction(C component) {
+        Action result = JCommand.of(this::edit).toAction(component);
+        result.putValue(Action.NAME, name);
+        return result;
+    }
 
-        void push(C source, JTable target);
+    private static boolean show(Component parent, JTable table, String title) {
+        JPanel panel = new JPanel(new BorderLayout());
 
-        void pull(JTable source, C target);
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(createToolBar(table.getActionMap()), BorderLayout.NORTH);
 
-        static <ROW, C extends Component> Bridge<ROW, C> of(BiConsumer<C, JTable> push, BiConsumer<JTable, C> pull) {
-            return new Bridge<ROW, C>() {
-                @Override
-                public void push(C source, JTable target) {
-                    push.accept(source, target);
-                }
+        return SwingUtil.showOkCancelDialog(parent, panel, title);
+    }
 
-                @Override
-                public void pull(JTable source, C target) {
-                    pull.accept(source, target);
-                }
-            };
-        }
+    private static JToolBar createToolBar(ActionMap am) {
+        JToolBar result = new JToolBar();
+        result.setFloatable(false);
 
-        static <ROW> Bridge<ROW, JComboBox<ROW>> comboBox() {
-            return of(Bridges::pushComboBox, Bridges::pullComboBox);
-        }
+        JButton item;
 
-        static <ROW> Bridge<ROW, JList<ROW>> list() {
-            return of(Bridges::pushList, Bridges::pullList);
+        item = result.add(am.get(ListTableActions.ADD_ACTION));
+        item.setText(null);
+        item.setToolTipText("Add");
+        item.setIcon(FontAwesome.FA_PLUS.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.DUPLICATE_ACTION));
+        item.setText(null);
+        item.setToolTipText("Duplicate");
+        item.setIcon(FontAwesome.FA_PLUS_SQUARE.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.FILL_ACTION));
+        item.setText(null);
+        item.setToolTipText("Auto fill");
+        item.setIcon(FontAwesome.FA_MAGIC.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.REMOVE_ACTION));
+        item.setText(null);
+        item.setToolTipText("Remove");
+        item.setIcon(FontAwesome.FA_MINUS.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.CLEAR_ACTION));
+        item.setText(null);
+        item.setToolTipText("Clear");
+        item.setIcon(FontAwesome.FA_TIMES.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.MOVE_UP_ACTION));
+        item.setText(null);
+        item.setToolTipText("Move up");
+        item.setIcon(FontAwesome.FA_ARROW_UP.getIcon(Color.DARK_GRAY, 14f));
+
+        item = result.add(am.get(ListTableActions.MOVE_DOWN_ACTION));
+        item.setText(null);
+        item.setToolTipText("Move down");
+        item.setIcon(FontAwesome.FA_ARROW_DOWN.getIcon(Color.DARK_GRAY, 14f));
+
+        return result;
+    }
+
+    private static final int NO_SELECTION = -1;
+
+    private static <ROW> void pushComboBox(JComboBox<ROW> source, JTable target) {
+        ComboBoxModel<ROW> sourceModel = source.getModel();
+
+        ListTableModel<ROW> targetModel = (ListTableModel<ROW>) target.getModel();
+        targetModel.getRows().clear();
+        targetModel.copyFrom(sourceModel);
+
+        int selectedIndex = source.getSelectedIndex();
+        if (selectedIndex != NO_SELECTION) {
+            target.getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
+        } else {
+            target.getSelectionModel().clearSelection();
         }
     }
 
-    private static class Bridges {
+    private static <ROW> void pullComboBox(JTable source, JComboBox<ROW> target) {
+        ListTableModel<ROW> sourceModel = (ListTableModel<ROW>) source.getModel();
 
-        private static final int NO_SELECTION = -1;
+        DefaultComboBoxModel<ROW> targetModel = new DefaultComboBoxModel<>();
+        sourceModel.getRows().forEach(targetModel::addElement);
+        target.setModel(targetModel);
 
-        private static void pushComboBox(JComboBox source, JTable target) {
-            ListTableModel model = ((ListTableModel) target.getModel());
-            model.getRows().clear();
-            model.copyFrom(source.getModel());
-
-            int selectedIndex = source.getSelectedIndex();
-            if (selectedIndex != NO_SELECTION) {
-                target.getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
-            } else {
-                target.getSelectionModel().clearSelection();
-            }
-        }
-
-        private static void pullComboBox(JTable source, JComboBox target) {
-            DefaultComboBoxModel model = new DefaultComboBoxModel();
-            ((ListTableModel) source.getModel()).getRows().forEach(model::addElement);
-            target.setModel(model);
-
-            target.setSelectedIndex(JLists.getSelectionIndexStream(source.getSelectionModel()).findFirst().orElse(NO_SELECTION));
-        }
-
-        private static void pushList(JList source, JTable target) {
-            ListTableModel model = ((ListTableModel) target.getModel());
-            model.getRows().clear();
-            model.copyFrom(source.getModel());
-
-            JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
-        }
-
-        private static void pullList(JTable source, JList target) {
-            DefaultListModel model = new DefaultListModel();
-            ((ListTableModel) source.getModel()).getRows().forEach(model::addElement);
-            target.setModel(model);
-
-            JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
-        }
+        target.setSelectedIndex(JLists.getSelectionIndexStream(source.getSelectionModel()).findFirst().orElse(NO_SELECTION));
     }
 
-    @lombok.RequiredArgsConstructor
-    private static final class EditCommand<ROW, C extends Component> extends JCommand<C> {
+    private static <ROW> void pushList(JList<ROW> source, JTable target) {
+        ListModel<ROW> sourceModel = source.getModel();
 
-        @lombok.NonNull
-        private final ListTableEdition<ROW> edition;
+        ListTableModel<ROW> targetModel = (ListTableModel<ROW>) target.getModel();
+        targetModel.getRows().clear();
+        targetModel.copyFrom(sourceModel);
 
-        @lombok.NonNull
-        private final Bridge<ROW, C> bridge;
+        JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
+    }
 
-        @Override
-        public void execute(C component) throws Exception {
-            XTable table = new XTable();
-            table.setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
+    private static <ROW> void pullList(JTable source, JList<ROW> target) {
+        ListTableModel<ROW> sourceModel = (ListTableModel<ROW>) source.getModel();
 
-            ListTableModel<ROW> model = new ListTableModel<>();
-            table.setModel(model);
-            edition.getColumnHandlers().forEach(model.getColumns()::add);
-            TableColumnDescriptor.applyAll(edition.getColumnDescriptors(), table.getColumnModel());
+        DefaultListModel<ROW> targetModel = new DefaultListModel<>();
+        sourceModel.getRows().forEach(targetModel::addElement);
+        target.setModel(targetModel);
 
-            bridge.push(component, table);
+        JLists.setSelectionIndexStream(target.getSelectionModel(), JLists.getSelectionIndexStream(source.getSelectionModel()));
+    }
 
-            if (show(component, table, edition.getValueFactory(), edition.getName())) {
-                bridge.pull(table, component);
-            }
-        }
+    private static <ROW> void pushText(JTextComponent source, JTable target, Function<String, List<ROW>> backward) {
+        String sourceModel = source.getText();
 
-        @Override
-        public JCommand.ActionAdapter toAction(C component) {
-            JCommand.ActionAdapter result = super.toAction(component);
-            result.putValue(Action.NAME, edition.getName());
-            return result;
-        }
+        ListTableModel<ROW> targetModel = (ListTableModel<ROW>) target.getModel();
+        targetModel.getRows().clear();
+        targetModel.getRows().addAll(backward.apply(sourceModel));
+    }
 
-        private static boolean show(Component parent, JTable table, Supplier<?> valueFactory, String title) {
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.getActionMap().put(ListTable.ADD_ACTION, ListTable.newAddAction(table, valueFactory));
-            panel.getActionMap().put(ListTable.REMOVE_ACTION, ListTable.newRemoveAction(table));
-            panel.getActionMap().put(ListTable.CLEAR_ACTION, ListTable.newClearAction(table));
-            panel.getActionMap().put(ListTable.MOVE_UP_ACTION, ListTable.newMoveUpAction(table));
-            panel.getActionMap().put(ListTable.MOVE_DOWN_ACTION, ListTable.newMoveDownAction(table));
+    private static <ROW> void pullText(JTable source, JTextComponent target, Function<List<ROW>, String> forward) {
+        ListTableModel<ROW> sourceModel = (ListTableModel<ROW>) source.getModel();
 
-            table.setComponentPopupMenu(createMenu(panel.getActionMap()).getPopupMenu());
-
-            panel.add(new JScrollPane(table), BorderLayout.CENTER);
-            panel.add(createToolBar(panel.getActionMap()), BorderLayout.NORTH);
-
-            return SwingUtil.showOkCancelDialog(parent, panel, title);
-        }
-
-        private static JToolBar createToolBar(ActionMap am) {
-            JToolBar result = new JToolBar();
-            result.setFloatable(false);
-
-            JButton item;
-
-            item = result.add(am.get(ListTable.ADD_ACTION));
-            item.setText(null);
-            item.setToolTipText("Add");
-            item.setIcon(FontAwesome.FA_PLUS.getIcon(Color.DARK_GRAY, 14f));
-
-            item = result.add(am.get(ListTable.REMOVE_ACTION));
-            item.setText(null);
-            item.setToolTipText("Remove");
-            item.setIcon(FontAwesome.FA_MINUS.getIcon(Color.DARK_GRAY, 14f));
-
-            item = result.add(am.get(ListTable.CLEAR_ACTION));
-            item.setText(null);
-            item.setToolTipText("Clear");
-            item.setIcon(FontAwesome.FA_TIMES.getIcon(Color.DARK_GRAY, 14f));
-
-            item = result.add(am.get(ListTable.MOVE_UP_ACTION));
-            item.setText(null);
-            item.setToolTipText("Move up");
-            item.setIcon(FontAwesome.FA_ARROW_UP.getIcon(Color.DARK_GRAY, 14f));
-
-            item = result.add(am.get(ListTable.MOVE_DOWN_ACTION));
-            item.setText(null);
-            item.setToolTipText("Move down");
-            item.setIcon(FontAwesome.FA_ARROW_DOWN.getIcon(Color.DARK_GRAY, 14f));
-
-            return result;
-        }
-
-        private static JMenu createMenu(ActionMap am) {
-            JMenu result = new JMenu();
-
-            JMenuItem item;
-
-            item = result.add(am.get(ListTable.ADD_ACTION));
-            item.setText("Add");
-
-            item = result.add(am.get(ListTable.REMOVE_ACTION));
-            item.setText("Remove");
-
-            item = result.add(am.get(ListTable.CLEAR_ACTION));
-            item.setText("Clear");
-
-            return result;
-        }
+        String targetModel = forward.apply(sourceModel.getRows());
+        target.setText(targetModel);
     }
 }

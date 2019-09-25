@@ -1,22 +1,28 @@
+dist: xenial
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
   - openjdk11
+  - openjdk-ea
+
+matrix:
+  allow_failures:
+    - jdk: openjdk-ea
 
 env:
   global:
-    - DEPLOY_JDK=oraclejdk8
+    - DEPLOY_JDK=openjdk8
     - DEPLOY_REPO=nbbrd/beanzooka
+    - DEPLOY_BIN=target/binaries/*
 
 deploy:
   # Github releases from tags
   - provider: releases
     api_key: "${GITHUB_KEY}"
     skip_cleanup: true
+    draft: true
     file_glob: true
-    file: 
-      - "target/*-bin.jar"
-      - "target/*.exe"
+    file: "${DEPLOY_BIN}"
     on:
       tags: true
       repo: "${DEPLOY_REPO}"

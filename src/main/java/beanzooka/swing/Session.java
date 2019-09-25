@@ -36,38 +36,40 @@ public class Session {
     private final File workingDir;
 
     private final PropertyChangeSupport propertyChangeSupport;
-    private final SwingWorker<Void, Void> worker;
+    private SwingWorker<Void, Void> worker;
 
     public Session(Configuration configuration, File workingDir) {
         this.configuration = configuration;
         this.workingDir = workingDir;
         this.propertyChangeSupport = new PropertyChangeSupport(this);
-        this.worker = new SwingWorker() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try {
-                    configuration.launch(workingDir);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return null;
-            }
-        };
-        worker.addPropertyChangeListener(o -> {
-            switch (o.getPropertyName()) {
-                case "state":
-                    propertyChangeSupport.firePropertyChange(o.getPropertyName(), o.getOldValue(), o.getNewValue());
-                    break;
-            }
-        });
     }
 
     public void execute() {
-        worker.execute();
+        if (worker == null || worker.getState() == SwingWorker.StateValue.DONE) {
+            this.worker = new SwingWorker() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        configuration.launch(workingDir);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    return null;
+                }
+            };
+            worker.addPropertyChangeListener(o -> {
+                switch (o.getPropertyName()) {
+                    case "state":
+                        propertyChangeSupport.firePropertyChange(o.getPropertyName(), o.getOldValue(), o.getNewValue());
+                        break;
+                }
+            });
+            worker.execute();
+        }
     }
 
     public SwingWorker.StateValue getState() {
-        return worker.getState();
+        return worker != null ? worker.getState() : SwingWorker.StateValue.PENDING;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

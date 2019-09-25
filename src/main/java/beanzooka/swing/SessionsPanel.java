@@ -42,6 +42,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
 
     public static final String OPEN_WORKING_DIR_ACTION = "openWorkingDir";
     public static final String OPEN_LOGS_ACTION = "openLogs";
+    public static final String RELAUNCH_ACTION = "relaunch";
 
     private final SessionTableModel sessionModel;
 
@@ -66,6 +67,9 @@ public final class SessionsPanel extends javax.swing.JPanel {
         OpenLogs openLogs = new OpenLogs();
         getActionMap().put(OPEN_LOGS_ACTION, openLogs.toAction(sessions));
 
+        Relaunch relaunch = new Relaunch();
+        getActionMap().put(RELAUNCH_ACTION, relaunch.toAction(sessions));
+
         ((XTable) sessions).setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
         sessions.setModel(sessionModel);
         sessions.setDefaultRenderer(SwingWorker.StateValue.class, JTables.cellRendererOf(Renderers::renderState));
@@ -82,6 +86,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
         JMenu result = new JMenu();
         result.add(am.get(OPEN_WORKING_DIR_ACTION)).setText("Open user dir location");
         result.add(am.get(OPEN_LOGS_ACTION)).setText("Open logs location");
+        result.add(am.get(RELAUNCH_ACTION)).setText("Relaunch");
         return result;
     }
 
@@ -158,6 +163,26 @@ public final class SessionsPanel extends javax.swing.JPanel {
             return c.getSelectedRowCount() == 1
                     ? Optional.of(((SessionTableModel) c.getModel()).getRow(c.getSelectedRow()).getWorkingDir()).map(UserDir::resolveLogFile)
                     : Optional.empty();
+        }
+
+        @Override
+        public JCommand.ActionAdapter toAction(JTable c) {
+            return super.toAction(c)
+                    .withWeakListSelectionListener(c.getSelectionModel());
+        }
+    }
+
+    private static final class Relaunch extends JCommand<JTable> {
+
+        @Override
+        public boolean isEnabled(JTable c) {
+            return c.getSelectedRowCount() == 1
+                    && ((SessionTableModel) c.getModel()).getRow(c.getSelectedRow()).getState() == SwingWorker.StateValue.DONE;
+        }
+
+        @Override
+        public void execute(JTable c) throws Exception {
+            ((SessionTableModel) c.getModel()).getRow(c.getSelectedRow()).execute();
         }
 
         @Override

@@ -28,8 +28,9 @@ import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
 import internal.swing.TableColumnDescriptor;
-import internal.swing.Converter;
 import internal.swing.JFileChoosers;
+import internal.swing.ListTableDescriptor;
+import internal.swing.ListTableEdition;
 import internal.swing.SwingUtil;
 import internal.swing.TextCellEditor;
 import java.awt.Color;
@@ -45,6 +46,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -63,7 +66,7 @@ class Renderers {
     final TableColumnDescriptor OPTIONS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.identity(), newOptionsField(), Renderers::onMoreOptions))
+                    .cellEditor(() -> TextCellEditor.of(o -> o, o -> o, newOptionsField(), Renderers::onMoreOptions))
                     .build();
 
     private final String OPTIONS_PROMPT = "options used by the launcher";
@@ -83,24 +86,36 @@ class Renderers {
         }
     }
 
+    private final FileFilter PLUGIN_FILTER = new FileNameExtensionFilter("NetBeans plugin", "nbm");
+
     final TableColumnDescriptor FILE_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFileField(), Renderers::onMoreFile))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(null), o -> Renderers.onMoreFile(o, null)))
                     .preferedWidth(300)
                     .build();
 
-    private JTextField newFileField() {
+    final TableColumnDescriptor PLUGIN_DESCRIPTOR
+            = TableColumnDescriptor.builder()
+                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(PLUGIN_FILTER::accept), o -> Renderers.onMoreFile(o, PLUGIN_FILTER)))
+                    .preferedWidth(300)
+                    .build();
+
+    private JTextField newFileField(java.io.FileFilter optionalFileFilter) {
         JTextField result = new JTextField();
         withPrompt("file path", result);
         JAutoCompletion completion = new JAutoCompletion(result);
-        completion.setSource(new FileAutoCompletionSource());
+        completion.setSource(new FileAutoCompletionSource(false, optionalFileFilter, new File[0]));
         completion.getList().setCellRenderer(new FileListCellRenderer(Executors.newSingleThreadExecutor()));
         return result;
     }
 
-    private void onMoreFile(JTextField textField) {
+    private void onMoreFile(JTextField textField, FileFilter optionalFileFilter) {
         JFileChooser result = new JFileChooser();
+        if (optionalFileFilter != null) {
+            result.setFileFilter(optionalFileFilter);
+        }
         result.setFileSelectionMode(JFileChooser.FILES_ONLY);
         result.setSelectedFile(new File(textField.getText()));
         JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
@@ -109,7 +124,7 @@ class Renderers {
     final TableColumnDescriptor CLUSTERS_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(Jdk::fromFiles, Jdk::toFiles), newClustersField(), null))
+                    .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField(), Renderers::onMoreClusters))
                     .build();
 
     private JTextField newClustersField() {
@@ -122,10 +137,18 @@ class Renderers {
         return result;
     }
 
+    private void onMoreClusters(JTextField textField) {
+        ListTableDescriptor<File> listTable = ListTableDescriptor
+                .builder(Renderers::newCluster)
+                .column("File", File.class, o -> o, (x, y) -> y, FOLDER_DESCRIPTOR)
+                .build();
+        ListTableEdition.ofText("Edit clusters", listTable, Jdk::fromFiles, Jdk::toFiles).edit(textField);
+    }
+
     final TableColumnDescriptor FOLDER_DESCRIPTOR
             = TableColumnDescriptor.builder()
                     .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
-                    .cellEditor(() -> new TextCellEditor<>(Converter.of(File::getPath, File::new), newFolderField(), Renderers::onMoreFolder))
+                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFolderField(), Renderers::onMoreFolder))
                     .preferedWidth(300)
                     .build();
 
@@ -254,8 +277,11 @@ class Renderers {
         return FontAwesome.FA_EXCLAMATION_CIRCLE.getIcon(Color.RED, label.getFont().getSize2D() * 1.2f);
     }
 
-    private File open(Class<?> id, int fileSelectionMode) {
+    private File open(Class<?> id, int fileSelectionMode, FileFilter optionalFileFilter) {
         JFileChooser fileChooser = new JFileChooser();
+        if (optionalFileFilter != null) {
+            fileChooser.setFileFilter(optionalFileFilter);
+        }
         JFileChoosers.autoPersist(fileChooser, Preferences.userNodeForPackage(id).node(id.getSimpleName()));
         fileChooser.setFileSelectionMode(fileSelectionMode);
         return JFileChoosers.getOpenFile(fileChooser, null).orElse(null);
@@ -268,31 +294,43 @@ class Renderers {
     }
 
     public App newApp() {
-        File file = open(App.class, JFileChooser.FILES_ONLY);
+        File file = open(App.class, JFileChooser.FILES_ONLY, null);
         return file != null
                 ? App.builder().label(file.getName()).file(file).build()
                 : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
     public Jdk newJdk() {
-        File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY);
+        File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
                 ? Jdk.builder().label(folder.getName()).javaHome(folder).build()
                 : Jdk.builder().label(randomLabel()).javaHome(EMPTY_FILE).build();
     }
 
+    public void fillJdk(List<Jdk> list) {
+        String javaHome = System.getProperty("java.home");
+        if (javaHome != null && list.stream().noneMatch(jdk -> jdk.getJavaHome().toString().equalsIgnoreCase(javaHome))) {
+            list.add(Jdk.builder().label("java home").javaHome(new File(javaHome)).build());
+        }
+    }
+
     public UserDir newUserDir() {
-        File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY);
+        File folder = open(UserDir.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
                 ? UserDir.builder().label(folder.getName()).folder(folder).build()
                 : UserDir.builder().label(randomLabel()).folder(EMPTY_FILE).build();
     }
 
     public Plugin newPlugin() {
-        File file = open(Plugin.class, JFileChooser.FILES_ONLY);
+        File file = open(Plugin.class, JFileChooser.FILES_ONLY, PLUGIN_FILTER);
         return file != null
                 ? Plugin.builder().label(file.getName()).file(file).build()
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
+    }
+
+    public File newCluster() {
+        File folder = open(ClusterFile.class, JFileChooser.DIRECTORIES_ONLY, null);
+        return folder != null ? folder : EMPTY_FILE;
     }
 
     private void withPrompt(String text, JTextComponent component) {
@@ -300,5 +338,8 @@ class Renderers {
         StandardSwingColor.TEXT_FIELD_INACTIVE_FOREGROUND.lookup().ifPresent(prompt::setForeground);
         prompt.setVerticalAlignment(JLabel.CENTER);
         prompt.setHorizontalAlignment(JLabel.CENTER);
+    }
+
+    private static final class ClusterFile {
     }
 }
