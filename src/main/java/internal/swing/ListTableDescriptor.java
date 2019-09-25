@@ -158,20 +158,26 @@ public class ListTableDescriptor<ROW> {
         }
 
         private void importData(int[] indices, JTable target, JTable.DropLocation dl) {
-            int index = dl.getRow();
-            if (indices[0] < index) {
-                index = index - indices.length;
-            }
-            move((ListTableModel) target.getModel(), (ListTableModel) target.getModel(), indices, index);
+            int index = computeIndex(dl.getRow(), indices);
+            move(((ListTableModel) target.getModel()).getRows(), indices, index);
             target.getSelectionModel().setSelectionInterval(index, index + indices.length - 1);
         }
+    }
 
-        private static void move(ListTableModel from, ListTableModel to, int[] selection, int dropIndex) {
-            List reversedItems = new ArrayList(selection.length);
-            for (int i = selection.length - 1; i >= 0; i--) {
-                reversedItems.add(from.getRows().remove(selection[i]));
-            }
-            to.getRows().addAll(dropIndex, reversedItems);
+    // visible for testing
+    static int computeIndex(int dropIndex, int[] indices) {
+        int shift = 0;
+        for (; shift < indices.length && indices[shift] < dropIndex; shift++) {
         }
+        return dropIndex - shift;
+    }
+
+    // visible for testing
+    static void move(List model, int[] selection, int dropIndex) {
+        List reversedItems = new ArrayList(selection.length);
+        for (int i = selection.length - 1; i >= 0; i--) {
+            reversedItems.add(model.remove(selection[i]));
+        }
+        reversedItems.forEach(o -> model.add(dropIndex, o));
     }
 }

@@ -31,7 +31,7 @@
     </properties>
 
     <dependencies>
-        <!-- annotations & processors -->
+        <!-- compile only -->
         <dependency>
             <groupId>org.checkerframework</groupId>
             <artifactId>checker-qual</artifactId>
@@ -45,7 +45,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- dependencies -->
+        <!-- compile and runtime -->
         <dependency>
             <groupId>be.nbb.rd</groupId>
             <artifactId>java-desktop-util-swing</artifactId>
@@ -70,6 +70,20 @@
                     <artifactId>jna-platform</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        
+        <!-- test only -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     
