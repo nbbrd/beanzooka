@@ -27,7 +27,7 @@
         <project.x.binaries>${project.build.directory}/binaries</project.x.binaries>
         <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
         <project.x.headerType>gui</project.x.headerType>
-        <java-desktop-util.version>2.2.3-SNAPSHOT</java-desktop-util.version>
+        <java-desktop-util.version>2.2.3</java-desktop-util.version>
     </properties>
 
     <dependencies>
