@@ -2,13 +2,8 @@ version: ~> 1.0
 import:
   - nbbrd/travis-ci:config/java8_application.yml@main
 
-matrix:
-  allow_failures:
-    - jdk: openjdk-ea
-    - arch: arm64
-
 env:
   global:
-    - DEPLOY_JDK=openjdk8
+    - DEPLOY_JOB_NAME=linux-amd64-openjdk8
     - DEPLOY_REPO=nbbrd/beanzooka
     - DEPLOY_BIN=target/binaries/*
