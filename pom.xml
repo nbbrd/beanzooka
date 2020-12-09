@@ -24,7 +24,7 @@
 
     <properties>
         <project.x.mainClass>beanzooka.Beanzooka</project.x.mainClass>
-        <project.x.binaries>${project.build.directory}/binaries</project.x.binaries>
+        <project.x.binaries>${project.basedir}/binaries</project.x.binaries>
         <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
         <project.x.headerType>gui</project.x.headerType>
         <java-desktop-util.version>2.2.4</java-desktop-util.version>
@@ -89,6 +89,19 @@
     
     <build>
         <plugins>
+            <!-- Clean binaries directory -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.x.binaries}</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
             <!-- Generates manifest for executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -194,6 +207,7 @@
                 <version>1.9</version>
                 <executions>
                     <execution>
+                        <phase>package</phase>
                         <goals>
                             <goal>files</goal>
                         </goals>
