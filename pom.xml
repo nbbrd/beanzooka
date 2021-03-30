@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>be.nbb.rd</groupId>
+    <groupId>com.github.nbbrd.beanzooka</groupId>
     <artifactId>beanzooka</artifactId>
     <version>1.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -45,7 +45,7 @@
         <project.x.binaries>${project.basedir}/binaries</project.x.binaries>
         <project.x.headerType>gui</project.x.headerType>
         <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
-        <java-desktop-util.version>2.2.4</java-desktop-util.version>
+        <java-desktop-util.version>2.2.5</java-desktop-util.version>
     </properties>
 
     <dependencies>
@@ -65,29 +65,19 @@
 
         <!-- compile and runtime -->
         <dependency>
-            <groupId>be.nbb.rd</groupId>
+            <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-swing</artifactId>
             <version>${java-desktop-util.version}</version>
         </dependency>
         <dependency>
-            <groupId>be.nbb.rd</groupId>
+            <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-fa</artifactId>
             <version>${java-desktop-util.version}</version>
         </dependency>
         <dependency>
-            <groupId>be.nbb.rd</groupId>
+            <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-os</artifactId>
             <version>${java-desktop-util.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.java.dev.jna</groupId>
-                    <artifactId>jna</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.java.dev.jna</groupId>
-                    <artifactId>jna-platform</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- test only -->
@@ -421,14 +411,4 @@
             </build>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>oss-jfrog-artifactory-releases</id>
-            <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
