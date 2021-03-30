@@ -159,8 +159,6 @@
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>
-                    <shadedArtifactId>${project.x.fileName}</shadedArtifactId>
-                    <outputDirectory>${project.x.binaries}</outputDirectory>
                 </configuration>
             </plugin>
 
@@ -171,12 +169,28 @@
                 <version>3.2.0</version>
                 <executions>
                     <execution>
+                        <id>generate-additional-properties</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>parse-version</goal>
                         </goals>
                         <configuration>
                             <propertyPrefix>project.x</propertyPrefix>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>attach-exe</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.exe</file>
+                                    <type>exe</type>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
@@ -195,8 +209,8 @@
                         </goals>
                         <configuration>
                             <headerType>${project.x.headerType}</headerType>
-                            <outfile>${project.x.binaries}/${project.x.fileName}-${project.version}.exe</outfile>
-                            <jar>${project.x.binaries}/${project.x.fileName}-${project.version}-bin.jar</jar>
+                            <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-bin.jar</jar>
                             <downloadUrl>https://adoptopenjdk.net/</downloadUrl>
                             <jre>
                                 <minVersion>${maven.compiler.target}</minVersion>
@@ -224,6 +238,59 @@
                 </executions>
             </plugin>
 
+            <!-- Copies files to binaries -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.x.binaries}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>*-bin.jar</include>
+                                        <include>*-bin.jar.asc</include>
+                                        <include>*.exe</include>
+                                        <include>*.exe.asc</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Renames binaries -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move todir="${project.x.binaries}">
+                                    <fileset dir="${project.x.binaries}">
+                                        <include name="**/${project.artifactId}-*"/>
+                                    </fileset>
+                                    <mapper type="glob" from="${project.artifactId}-*" to="${project.x.fileName}-*"/>
+                                </move>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Generates SHA256 on binaries -->
             <plugin>
                 <groupId>net.nicoulaj.maven.plugins</groupId>
@@ -231,7 +298,7 @@
                 <version>1.9</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>files</goal>
                         </goals>
@@ -246,6 +313,7 @@
                             <directory>${project.x.binaries}</directory>
                             <excludes>
                                 <exclude>*.sha256</exclude>
+                                <exclude>*.asc</exclude>
                             </excludes>
                         </fileSet>
                     </fileSets>
@@ -403,6 +471,57 @@
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Base deploy -->
+        <profile>
+            <id>base-deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-empty-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <excludePackageNames>*</excludePackageNames>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.simplify4u.plugins</groupId>
+                        <artifactId>sign-maven-plugin</artifactId>
+                        <version>0.3.0</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>sign</goal>
                                 </goals>
                             </execution>
                         </executions>
