@@ -24,7 +24,7 @@ import java.io.File;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
+@lombok.With
 public class App {
 
     @lombok.NonNull

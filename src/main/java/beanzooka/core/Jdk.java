@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  */
 @lombok.Value
 @lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
+@lombok.With
 public class Jdk {
 
     @lombok.NonNull
