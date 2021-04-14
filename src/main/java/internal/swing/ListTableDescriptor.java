@@ -42,7 +42,7 @@ import static javax.swing.TransferHandler.MOVE;
  * @param <ROW>
  */
 @lombok.Getter
-@lombok.Builder(builderClassName = "Builder")
+@lombok.Builder
 public class ListTableDescriptor<ROW> {
 
     @lombok.NonNull

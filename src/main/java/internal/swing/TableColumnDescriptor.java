@@ -29,7 +29,7 @@ import javax.swing.table.TableColumnModel;
  * @author Philippe Charles
  */
 @lombok.Getter
-@lombok.Builder(builderClassName = "Builder")
+@lombok.Builder
 public final class TableColumnDescriptor {
 
     public static final TableColumnDescriptor EMPTY = builder().build();

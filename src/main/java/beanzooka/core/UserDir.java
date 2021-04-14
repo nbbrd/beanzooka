@@ -25,7 +25,7 @@ import java.nio.file.Files;
  * @author Philippe Charles
  */
 @lombok.Value
-@lombok.Builder(builderClassName = "Builder")
+@lombok.Builder
 @lombok.With
 public class UserDir {
 
