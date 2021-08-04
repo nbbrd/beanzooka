@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix reordering by dnd
 
-### Modified
+### Changed
 - Remove specific binary for Windows
 
 ## [1.1.0] - 2019-09-25
