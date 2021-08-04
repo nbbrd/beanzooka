@@ -11,6 +11,7 @@
     <name>Beanzooka</name>
     <description>NetBeans Platform Launcher</description>
     <url>https://github.com/nbbrd/beanzooka</url>
+    <inceptionYear>2019</inceptionYear>
 
     <!-- Used by launch4j -->
     <organization>
@@ -42,8 +43,6 @@
     <properties>
         <project.x.mainClass>beanzooka.Beanzooka</project.x.mainClass>
         <project.x.fileName>beanzooka</project.x.fileName>
-        <project.x.binaries>${project.basedir}/binaries</project.x.binaries>
-        <project.x.headerType>gui</project.x.headerType>
         <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
         <java-desktop-util.version>2.2.5</java-desktop-util.version>
     </properties>
@@ -97,37 +96,6 @@
 
     <build>
         <plugins>
-            <!-- Clean binaries directory -->
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${project.x.binaries}</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <!-- Generates manifest for executable jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <mainClass>${project.x.mainClass}</mainClass>
-                        </manifest>
-                        <manifestEntries>
-                            <SplashScreen-Image>${project.x.splash}</SplashScreen-Image>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-
             <!-- Generates a all-in-one executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,169 +123,16 @@
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"/>
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>${project.x.mainClass}</Main-Class>
+                                <SplashScreen-Image>${project.x.splash}</SplashScreen-Image>
+                            </manifestEntries>
+                        </transformer>
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>
-                </configuration>
-            </plugin>
-
-            <!-- Parse version into different properties -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-additional-properties</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>parse-version</goal>
-                        </goals>
-                        <configuration>
-                            <propertyPrefix>project.x</propertyPrefix>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-exe</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.exe</file>
-                                    <type>exe</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Generates a Windows exe -->
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>2.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>${project.x.headerType}</headerType>
-                            <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
-                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-bin.jar</jar>
-                            <downloadUrl>https://adoptopenjdk.net/</downloadUrl>
-                            <jre>
-                                <minVersion>${maven.compiler.target}</minVersion>
-                                <path>%JAVA_HOME%</path>
-                                <bundledJreAsFallback>true</bundledJreAsFallback>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>
-                                    ${project.x.majorVersion}.${project.x.minorVersion}.${project.x.incrementalVersion}.${project.x.buildNumber}
-                                </fileVersion>
-                                <txtFileVersion>${project.version}</txtFileVersion>
-                                <fileDescription>${project.description}</fileDescription>
-                                <copyright>${project.organization.name}</copyright>
-                                <productVersion>
-                                    ${project.x.majorVersion}.${project.x.minorVersion}.${project.x.incrementalVersion}.${project.x.buildNumber}
-                                </productVersion>
-                                <txtProductVersion>${project.version}</txtProductVersion>
-                                <productName>${project.x.fileName}</productName>
-                                <internalName>${project.x.fileName}</internalName>
-                                <originalFilename>${project.x.fileName}.exe</originalFilename>
-                            </versionInfo>
-                            <icon>${project.basedir}/logo/beanzooka_redux.ico</icon>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Copies files to binaries -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.x.binaries}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}</directory>
-                                    <includes>
-                                        <include>*-bin.jar</include>
-                                        <include>*-bin.jar.asc</include>
-                                        <include>*.exe</include>
-                                        <include>*.exe.asc</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Renames binaries -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <move todir="${project.x.binaries}">
-                                    <fileset dir="${project.x.binaries}">
-                                        <include name="**/${project.artifactId}-*"/>
-                                    </fileset>
-                                    <mapper type="glob" from="${project.artifactId}-*" to="${project.x.fileName}-*"/>
-                                </move>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Generates SHA256 on binaries -->
-            <plugin>
-                <groupId>net.nicoulaj.maven.plugins</groupId>
-                <artifactId>checksum-maven-plugin</artifactId>
-                <version>1.11</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <algorithms>
-                        <algorithm>SHA-256</algorithm>
-                    </algorithms>
-                    <fileSets>
-                        <fileSet>
-                            <directory>${project.x.binaries}</directory>
-                            <excludes>
-                                <exclude>*.sha256</exclude>
-                                <exclude>*.asc</exclude>
-                            </excludes>
-                        </fileSet>
-                    </fileSets>
-                    <csvSummary>false</csvSummary>
+                    <!--                    <finalName>${project.x.fileName}-${project.version}-bin</finalName>-->
                 </configuration>
             </plugin>
         </plugins>
@@ -503,52 +318,64 @@
             </build>
         </profile>
 
-        <!-- Base deploy -->
         <profile>
-            <id>base-deploy</id>
+            <id>full-release</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
+                        <groupId>org.jreleaser</groupId>
+                        <artifactId>jreleaser-maven-plugin</artifactId>
+                        <version>0.6.0</version>
                         <executions>
                             <execution>
-                                <id>attach-sources</id>
+                                <phase>install</phase>
                                 <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.0</version>
-                        <executions>
-                            <execution>
-                                <id>attach-empty-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
+                                    <goal>full-release</goal>
                                 </goals>
                             </execution>
                         </executions>
                         <configuration>
-                            <excludePackageNames>*</excludePackageNames>
-                            <quiet>true</quiet>
+                            <jreleaser>
+                                <release>
+                                    <github>
+                                        <skipTag>true</skipTag>
+                                        <draft>true</draft>
+                                        <!-- Fix default value -->
+                                        <branch>master</branch>
+                                        <changelog>
+                                            <external>${project.basedir}/CHANGELOG.md</external>
+                                        </changelog>
+                                    </github>
+                                </release>
+                                <checksum>
+                                    <individual>true</individual>
+                                </checksum>
+                                <signing>
+                                    <active>ALWAYS</active>
+                                    <!-- Fix default value -->
+                                    <armored>true</armored>
+                                </signing>
+                                <distributions>
+                                    <!-- Name is here ! -->
+                                    <beanzooka>
+                                        <type>SINGLE_JAR</type>
+                                        <artifacts>
+                                            <artifact>
+                                                <path>
+                                                    ${project.build.directory}/${project.x.fileName}-${project.version}-bin.jar
+                                                </path>
+                                            </artifact>
+                                        </artifacts>
+                                        <scoop>
+                                            <active>RELEASE</active>
+                                        </scoop>
+                                        <brew>
+                                            <active>RELEASE</active>
+                                        </brew>
+                                    </beanzooka>
+                                </distributions>
+                            </jreleaser>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.simplify4u.plugins</groupId>
-                        <artifactId>sign-maven-plugin</artifactId>
-                        <version>0.3.1</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
