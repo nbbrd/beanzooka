@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Remove specific binary for Windows
-- Change look&feel to FlatLightLaf
+- Change look&feel to FlatLightLaf [#138](https://github.com/nbbrd/beanzooka/issues/138)
 
 ## [1.1.0] - 2019-09-25
 
