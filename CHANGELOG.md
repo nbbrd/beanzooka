@@ -11,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add distribution to Homebrew (macOS & Linux)
 
 ### Fixed
-- Fix reordering by dnd
+- Fix reordering by dnd [#32](https://github.com/nbbrd/beanzooka/issues/32)
 
 ### Changed
 - Remove specific binary for Windows
+- Change look&feel to FlatLightLaf
 
 ## [1.1.0] - 2019-09-25
 
