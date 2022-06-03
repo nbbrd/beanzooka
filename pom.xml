@@ -120,6 +120,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>2.3</version>
+        </dependency>
 
         <!-- test only -->
         <dependency>
