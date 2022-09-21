@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2019-09-25
 
 This is a feature release of **Beanzooka**.   
-Beanzooka follows [semantic versioning](http://semver.org/).
+Beanzooka follows [semantic versioning](https://semver.org/).
 
 ### Added
 - Add auto-fill in editor
@@ -41,7 +41,7 @@ Beanzooka follows [semantic versioning](http://semver.org/).
 ## [1.0.0] - 2019-03-20
 
 This is the initial release of **Beanzooka**.   
-Beanzooka follows [semantic versioning](http://semver.org/).
+Beanzooka follows [semantic versioning](https://semver.org/).
 
 [Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/nbbrd/beanzooka/compare/v1.0.0...v1.1.0
