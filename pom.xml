@@ -241,7 +241,7 @@
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>
-                    <!--                    <finalName>${project.x.fileName}-${project.version}-bin</finalName>-->
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
             </plugin>
         </plugins>
