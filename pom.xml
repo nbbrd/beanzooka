@@ -44,7 +44,6 @@
         <project.x.mainClass>beanzooka.Beanzooka</project.x.mainClass>
         <project.x.fileName>beanzooka</project.x.fileName>
         <project.x.splash>beanzooka/beanzooka.png</project.x.splash>
-        <java-desktop-util.version>2.2.8</java-desktop-util.version>
     </properties>
 
     <dependencyManagement>
@@ -53,6 +52,13 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>5.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.nbbrd.java-desktop-util</groupId>
+                <artifactId>java-desktop-util-bom</artifactId>
+                <version>2.2.8</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -78,47 +84,14 @@
         <dependency>
             <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-swing</artifactId>
-            <version>${java-desktop-util.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.checkerframework</groupId>
-                    <artifactId>checker-qual</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-fa</artifactId>
-            <version>${java-desktop-util.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.checkerframework</groupId>
-                    <artifactId>checker-qual</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.nbbrd.java-desktop-util</groupId>
             <artifactId>java-desktop-util-os</artifactId>
-            <version>${java-desktop-util.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.checkerframework</groupId>
-                    <artifactId>checker-qual</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -290,15 +263,82 @@
             </build>
         </profile>
 
-        <!-- Enforce Java8 API -->
+        <!-- Run Java8 build with JPMS on JDK9+ -->
         <profile>
-            <id>enforce-java8-api</id>
+            <id>java8-with-jpms</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>[9,)</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <!-- Fix NetBeans bug with test packages -->
+                <maven.compiler.target>9</maven.compiler.target>
+                <maven.compiler.source>9</maven.compiler.source>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <!-- First: compile all as Java9 -->
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <release>9</release>
+                                </configuration>
+                            </execution>
+                            <!-- Second: recompile all but module-info as Java8 -->
+                            <execution>
+                                <id>base-compile</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <source>8</source>
+                                    <target>8</target>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <!-- Third: compile all tests as Java8 -->
+                            <!-- This fails in NetBeans ... -->
+                            <execution>
+                                <id>default-testCompile</id>
+                                <configuration>
+                                    <release>8</release>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Run Java8 build without JPMS on JDK8 -->
+        <profile>
+            <id>java8-without-jpms</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <!-- Enforce dependency & Maven-central rules -->
