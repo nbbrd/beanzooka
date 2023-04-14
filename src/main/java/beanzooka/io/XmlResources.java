@@ -45,7 +45,7 @@ public class XmlResources {
 
     @NonNull
     public Resources read(@NonNull Path file) throws IOException, XMLStreamException {
-        XMLInputFactory factory = XMLInputFactory.newFactory();
+        XMLInputFactory factory = XMLInputFactory.newInstance();
         try (Reader reader = Files.newBufferedReader(file)) {
             XMLStreamReader xml = factory.createXMLStreamReader(reader);
             try {
