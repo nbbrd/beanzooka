@@ -25,8 +25,8 @@ import java.nio.file.Files;
  * @author Philippe Charles
  */
 @lombok.Value
-@lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
+@lombok.Builder
+@lombok.With
 public class UserDir {
 
     public static final UserDir TEMP = UserDir.builder().label("---").folder(new File("")).build();

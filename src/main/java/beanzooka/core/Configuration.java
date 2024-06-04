@@ -26,7 +26,7 @@ import java.util.Optional;
  * @author Philippe Charles
  */
 @lombok.Value
-@lombok.Builder(builderClassName = "Builder")
+@lombok.Builder
 public class Configuration {
 
     private App app;

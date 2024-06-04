@@ -23,8 +23,8 @@ import java.util.List;
  * @author Philippe Charles
  */
 @lombok.Value
-@lombok.Builder(builderClassName = "Builder")
-@lombok.experimental.Wither
+@lombok.Builder
+@lombok.With
 public class Resources {
 
     @lombok.Singular
