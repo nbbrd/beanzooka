@@ -1,17 +1,17 @@
 /*
  * Copyright 2018 National Bank of Belgium
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
+ *
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and 
+ * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
 package beanzooka.swing;
@@ -20,22 +20,20 @@ import beanzooka.core.App;
 import beanzooka.core.Jdk;
 import beanzooka.core.UserDir;
 import ec.util.grid.swing.XTable;
-import internal.swing.SwingUtil;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.JCommand;
+import internal.swing.JCommand2;
 import internal.swing.ShowInFolderCommand;
+import internal.swing.SwingUtil;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.ActionMap;
-import javax.swing.JMenu;
-import javax.swing.JTable;
-import javax.swing.SwingWorker;
-import javax.swing.table.AbstractTableModel;
 
 /**
- *
  * @author Philippe Charles
  */
 public final class SessionsPanel extends javax.swing.JPanel {
@@ -58,9 +56,13 @@ public final class SessionsPanel extends javax.swing.JPanel {
 
     public void add(Session session) {
         sessionModel.add(session);
+        int rowIndex = sessionModel.getRowCount() - 1;
+        sessions.getSelectionModel().setSelectionInterval(rowIndex, rowIndex);
     }
 
     private void initComponents2() {
+        sessions.setModel(sessionModel);
+
         OpenWorkingDir openWorkingDir = new OpenWorkingDir();
         getActionMap().put(OPEN_WORKING_DIR_ACTION, openWorkingDir.toAction(sessions));
 
@@ -71,7 +73,6 @@ public final class SessionsPanel extends javax.swing.JPanel {
         getActionMap().put(RELAUNCH_ACTION, relaunch.toAction(sessions));
 
         ((XTable) sessions).setNoDataRenderer(new XTable.DefaultNoDataRenderer(""));
-        sessions.setModel(sessionModel);
         sessions.setDefaultRenderer(SwingWorker.StateValue.class, JTables.cellRendererOf(Renderers::renderState));
         sessions.setDefaultRenderer(App.class, JTables.cellRendererOf(Renderers::renderApp));
         sessions.setDefaultRenderer(Jdk.class, JTables.cellRendererOf(Renderers::renderJdk));
@@ -106,30 +107,30 @@ public final class SessionsPanel extends javax.swing.JPanel {
         jLabel3.setText("Sessions:");
 
         sessions.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+                new Object[][]{
 
-            },
-            new String [] {
+                },
+                new String[]{
 
-            }
+                }
         ));
         jScrollPane2.setViewportView(sessions);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel3)
-                .addGap(0, 0, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -172,7 +173,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
         }
     }
 
-    private static final class Relaunch extends JCommand<JTable> {
+    private static final class Relaunch extends JCommand2<JTable> {
 
         @Override
         public boolean isEnabled(JTable c) {
@@ -186,8 +187,9 @@ public final class SessionsPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public JCommand.ActionAdapter toAction(JTable c) {
-            return super.toAction(c)
+        public JCommand2.ActionAdapter2 toAction(JTable c) {
+            return (JCommand2.ActionAdapter2) super.toAction(c)
+                    .withWeakTableModelListener(c.getModel())
                     .withWeakListSelectionListener(c.getSelectionModel());
         }
     }
@@ -202,9 +204,10 @@ public final class SessionsPanel extends javax.swing.JPanel {
         }
 
         public void add(Session session) {
+            final int index = list.size();
             list.add(session);
-            session.addPropertyChangeListener(o -> fireTableDataChanged());
-            fireTableDataChanged();
+            session.addPropertyChangeListener(o -> fireTableRowsUpdated(index, index));
+            fireTableRowsInserted(index, index);
         }
 
         public Session getRow(int rowIndex) {

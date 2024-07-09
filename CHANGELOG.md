@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add relaunch button [#318](https://github.com/nbbrd/beanzooka/issues/318)
+
 ## [1.2.0] - 2024-06-04
 
 ### Added

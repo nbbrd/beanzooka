@@ -1,17 +1,17 @@
 /*
  * Copyright 2018 National Bank of Belgium
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
+ *
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and 
+ * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
 package beanzooka.swing;
@@ -24,34 +24,29 @@ import internal.swing.About;
 import internal.swing.FixedImageIcon;
 import internal.swing.JFileChoosers;
 import internal.swing.SwingUtil;
-import java.awt.Color;
-import java.awt.Dimension;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.stream.XMLStreamException;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
-import javax.swing.Action;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.stream.XMLStreamException;
 
 /**
- *
  * @author Philippe Charles
  */
 @lombok.extern.java.Log
 public final class MainPanel extends javax.swing.JPanel {
+
+    public static final String NEW_ACTION = "new";
+    public static final String OPEN_ACTION = "open";
+    public static final String SAVE_AS_ACTION = "saveAs";
+    public static final String LAUNCH_ACTION = "launch";
+    public static final String ABOUT_ACTION = "about";
 
     /**
      * Creates new form NetBeansLauncher
@@ -63,11 +58,21 @@ public final class MainPanel extends javax.swing.JPanel {
     }
 
     private void initCommands() {
-        new NewCmd().init(newButton, this, FontAwesome.FA_FILE, "New", "F1");
-        new OpenCmd().init(openButton, this, FontAwesome.FA_FOLDER_OPEN, "Open", "F2");
-        new SaveAsCmd().init(saveAsButton, this, FontAwesome.FA_UPLOAD, "Save as", "F3");
-        new LaunchCmd().init(launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
-        new AboutCmd().init(aboutButton, this, FontAwesome.FA_INFO_CIRCLE, "About", "F7");
+        init(NEW_ACTION, new NewCmd().toAction(this), newButton, this, FontAwesome.FA_FILE, "New", "F1");
+        init(OPEN_ACTION, new OpenCmd().toAction(this), openButton, this, FontAwesome.FA_FOLDER_OPEN, "Open", "F2");
+        init(SAVE_AS_ACTION, new SaveAsCmd().toAction(this), saveAsButton, this, FontAwesome.FA_UPLOAD, "Save as", "F3");
+        init(LAUNCH_ACTION, new LaunchCmd().toAction(this), launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
+        init(SessionsPanel.RELAUNCH_ACTION, sessions.getActionMap().get(SessionsPanel.RELAUNCH_ACTION), relaunchButton, this, FontAwesome.FA_PLAY_CIRCLE_O, "Relaunch", "F6");
+        init(ABOUT_ACTION, new AboutCmd().toAction(this), aboutButton, this, FontAwesome.FA_INFO_CIRCLE, "About", "F7");
+    }
+
+    private void init(String id, Action action, JButton button, MainPanel c, FontAwesome icon, String toolTip, String key) {
+        button.setAction(action);
+        button.setIcon(icon.getIcon(Color.DARK_GRAY, 14f));
+        button.setToolTipText(toolTip + " (" + key + ")");
+
+        c.getActionMap().put(id, action);
+        c.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(key), id);
     }
 
     private void preventClosing() {
@@ -95,20 +100,6 @@ public final class MainPanel extends javax.swing.JPanel {
     }
 
     private static abstract class CustomCommand extends JCommand<MainPanel> {
-
-        public CustomCommand init(JButton button, MainPanel c, FontAwesome icon, String toolTip, String key) {
-            Action action = toAction(c);
-
-            button.setAction(action);
-            button.setIcon(icon.getIcon(Color.DARK_GRAY, 14f));
-            button.setToolTipText(toolTip + " (" + key + ")");
-
-            String id = getClass().getName();
-            c.getActionMap().put(id, action);
-            c.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(key), id);
-
-            return this;
-        }
 
         @Override
         public ActionAdapter toAction(MainPanel component) {
@@ -227,6 +218,7 @@ public final class MainPanel extends javax.swing.JPanel {
         saveAsButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         launchButton = new javax.swing.JButton();
+        relaunchButton = new javax.swing.JButton();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         aboutButton = new javax.swing.JButton();
         resources = new beanzooka.swing.ResourcesPanel();
@@ -234,7 +226,6 @@ public final class MainPanel extends javax.swing.JPanel {
 
         setPreferredSize(new java.awt.Dimension(600, 400));
 
-        jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
         newButton.setText("new");
@@ -265,6 +256,13 @@ public final class MainPanel extends javax.swing.JPanel {
         launchButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         launchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(launchButton);
+
+        relaunchButton.setText("relaunch");
+        relaunchButton.setToolTipText("Relaunch job");
+        relaunchButton.setFocusable(false);
+        relaunchButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        relaunchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(relaunchButton);
         jToolBar1.add(filler1);
 
         aboutButton.setText("about");
@@ -276,24 +274,24 @@ public final class MainPanel extends javax.swing.JPanel {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(resources, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(resources, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resources, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(resources, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -306,6 +304,7 @@ public final class MainPanel extends javax.swing.JPanel {
     private javax.swing.JButton launchButton;
     private javax.swing.JButton newButton;
     private javax.swing.JButton openButton;
+    private javax.swing.JButton relaunchButton;
     private beanzooka.swing.ResourcesPanel resources;
     private javax.swing.JButton saveAsButton;
     private beanzooka.swing.SessionsPanel sessions;

@@ -48,7 +48,6 @@
   <SubComponents>
     <Container class="javax.swing.JToolBar" name="jToolBar1">
       <Properties>
-        <Property name="floatable" type="boolean" value="false"/>
         <Property name="rollover" type="boolean" value="true"/>
       </Properties>
 
@@ -89,6 +88,16 @@
             <Property name="toolTipText" type="java.lang.String" value="Launch job"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
+            <Property name="verticalTextPosition" type="int" value="3"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="relaunchButton">
+          <Properties>
+            <Property name="toolTipText" type="java.lang.String" value="Relaunch job"/>
+            <Property name="actionCommand" type="java.lang.String" value="relaunch"/>
+            <Property name="focusable" type="boolean" value="false"/>
+            <Property name="horizontalTextPosition" type="int" value="0"/>
+            <Property name="label" type="java.lang.String" value="relaunch"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
