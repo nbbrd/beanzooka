@@ -22,7 +22,6 @@ import beanzooka.core.UserDir;
 import ec.util.grid.swing.XTable;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.JCommand;
-import internal.swing.JCommand2;
 import internal.swing.ShowInFolderCommand;
 import internal.swing.SwingUtil;
 
@@ -173,7 +172,7 @@ public final class SessionsPanel extends javax.swing.JPanel {
         }
     }
 
-    private static final class Relaunch extends JCommand2<JTable> {
+    private static final class Relaunch extends JCommand<JTable> {
 
         @Override
         public boolean isEnabled(JTable c) {
@@ -187,8 +186,8 @@ public final class SessionsPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public JCommand2.ActionAdapter2 toAction(JTable c) {
-            return (JCommand2.ActionAdapter2) super.toAction(c)
+        public JCommand.ActionAdapter toAction(JTable c) {
+            return super.toAction(c)
                     .withWeakTableModelListener(c.getModel())
                     .withWeakListSelectionListener(c.getSelectionModel());
         }
