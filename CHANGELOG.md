@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add relaunch button [#318](https://github.com/nbbrd/beanzooka/issues/318)
+- Add auto-fill actions [#320](https://github.com/nbbrd/beanzooka/issues/320)
 
 ## [1.2.0] - 2024-06-04
 

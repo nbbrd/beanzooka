@@ -20,6 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Philippe Charles
@@ -39,5 +44,20 @@ public class Plugin {
         try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), (ClassLoader) null)) {
             Util.copyAll(fs.getPath("/netbeans"), folder.toPath());
         }
+    }
+
+    public static List<Plugin> ofDesktopSearch(Function<String, File[]> engine) {
+        return Stream.of(engine.apply(".nbm"))
+                .filter(Plugin::isNbm)
+                .map(Plugin::ofNbm)
+                .collect(toList());
+    }
+
+    private static boolean isNbm(File file) {
+        return file.getName().endsWith(".nbm");
+    }
+
+    private static Plugin ofNbm(File file) {
+        return Plugin.builder().label(file.getName()).file(file).build();
     }
 }

@@ -1,36 +1,29 @@
 /*
  * Copyright 2018 National Bank of Belgium
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
+ *
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and 
+ * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
 package beanzooka.swing;
 
-import beanzooka.core.App;
-import beanzooka.core.Configuration;
-import beanzooka.core.Jdk;
-import beanzooka.core.Plugin;
-import beanzooka.core.Resources;
-import beanzooka.core.UserDir;
-import internal.swing.SwingUtil;
+import beanzooka.core.*;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
-import internal.swing.CopyPathCommand;
-import internal.swing.ListTableEdition;
-import internal.swing.EventShield;
-import internal.swing.ListTableDescriptor;
-import internal.swing.ShowInFolderCommand;
-import internal.swing.TableColumnDescriptor;
+import internal.swing.*;
+
+import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListSelectionEvent;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -39,17 +32,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javax.swing.Action;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JPopupMenu;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListSelectionEvent;
 
 /**
- *
  * @author Philippe Charles
  */
 public final class ResourcesPanel extends javax.swing.JPanel {
@@ -281,36 +265,40 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
     private static final ListTableDescriptor<App> APPS
             = ListTableDescriptor
-                    .builder(Renderers::newApp)
-                    .column("Label", String.class, App::getLabel, App::withLabel, Renderers.LABEL_DESCRIPTOR)
-                    .column("File", File.class, App::getFile, App::withFile, Renderers.FILE_DESCRIPTOR)
-                    .build();
+            .builder(Renderers::newApp)
+            .valueFiller(Renderers::fillApp)
+            .enableFiller(true)
+            .column("Label", String.class, App::getLabel, App::withLabel, Renderers.LABEL_DESCRIPTOR)
+            .column("File", File.class, App::getFile, App::withFile, Renderers.FILE_DESCRIPTOR)
+            .build();
 
     private static final ListTableDescriptor<Jdk> JDKS
             = ListTableDescriptor
-                    .builder(Renderers::newJdk)
-                    .valueFiller(Renderers::fillJdk)
-                    .enableFiller(true)
-                    .column("Label", String.class, Jdk::getLabel, Jdk::withLabel, Renderers.LABEL_DESCRIPTOR)
-                    .column("Java home", File.class, Jdk::getJavaHome, Jdk::withJavaHome, Renderers.FOLDER_DESCRIPTOR)
-                    .column("Options", String.class, Jdk::getOptions, Jdk::withOptions, Renderers.OPTIONS_DESCRIPTOR)
-                    .column("Clusters", List.class, Jdk::getClusters, Jdk::withClusters, Renderers.CLUSTERS_DESCRIPTOR)
-                    .build();
+            .builder(Renderers::newJdk)
+            .valueFiller(Renderers::fillJdk)
+            .enableFiller(true)
+            .column("Label", String.class, Jdk::getLabel, Jdk::withLabel, Renderers.LABEL_DESCRIPTOR)
+            .column("Java home", File.class, Jdk::getJavaHome, Jdk::withJavaHome, Renderers.FOLDER_DESCRIPTOR)
+            .column("Options", String.class, Jdk::getOptions, Jdk::withOptions, Renderers.OPTIONS_DESCRIPTOR)
+            .column("Clusters", List.class, Jdk::getClusters, Jdk::withClusters, Renderers.CLUSTERS_DESCRIPTOR)
+            .build();
 
     private static final ListTableDescriptor<UserDir> USER_DIRS
             = ListTableDescriptor
-                    .builder(Renderers::newUserDir)
-                    .column("Label", String.class, UserDir::getLabel, UserDir::withLabel, Renderers.LABEL_DESCRIPTOR)
-                    .column("Folder", File.class, UserDir::getFolder, UserDir::withFolder, Renderers.FOLDER_DESCRIPTOR)
-                    .column("Clone", Boolean.class, UserDir::isClone, UserDir::withClone, TableColumnDescriptor.EMPTY)
-                    .build();
+            .builder(Renderers::newUserDir)
+            .column("Label", String.class, UserDir::getLabel, UserDir::withLabel, Renderers.LABEL_DESCRIPTOR)
+            .column("Folder", File.class, UserDir::getFolder, UserDir::withFolder, Renderers.FOLDER_DESCRIPTOR)
+            .column("Clone", Boolean.class, UserDir::isClone, UserDir::withClone, TableColumnDescriptor.EMPTY)
+            .build();
 
     private static final ListTableDescriptor<Plugin> PLUGINS
             = ListTableDescriptor
-                    .builder(Renderers::newPlugin)
-                    .column("Label", String.class, Plugin::getLabel, Plugin::withLabel, Renderers.LABEL_DESCRIPTOR)
-                    .column("File", File.class, Plugin::getFile, Plugin::withFile, Renderers.PLUGIN_DESCRIPTOR)
-                    .build();
+            .builder(Renderers::newPlugin)
+            .valueFiller(Renderers::fillPlugin)
+            .enableFiller(true)
+            .column("Label", String.class, Plugin::getLabel, Plugin::withLabel, Renderers.LABEL_DESCRIPTOR)
+            .column("File", File.class, Plugin::getFile, Plugin::withFile, Renderers.PLUGIN_DESCRIPTOR)
+            .build();
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -350,46 +338,46 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
-                        .addComponent(tempUserDir))
-                    .addComponent(userDirs, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jdks, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(apps, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(jLabel1)
+                                        .addComponent(jLabel2)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel3)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
+                                                .addComponent(tempUserDir))
+                                        .addComponent(userDirs, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jdks, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(apps, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel5)
+                                                .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(apps, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jdks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(tempUserDir))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(userDirs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1)
+                                        .addComponent(jLabel5))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(apps, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jLabel2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jdks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel3)
+                                                        .addComponent(tempUserDir))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(userDirs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
     }// </editor-fold>//GEN-END:initComponents
 
