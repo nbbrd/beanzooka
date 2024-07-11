@@ -16,6 +16,8 @@
  */
 package internal.swing;
 
+import nbbrd.io.sys.SystemProperties;
+
 /**
  *
  * @author Philippe Charles
@@ -25,38 +27,39 @@ package internal.swing;
 public class About {
 
     public static About lookup() {
+        SystemProperties props = SystemProperties.DEFAULT;
         return builder()
                 .application(lookupApplication())
-                .java(lookupJava())
-                .runtime(lookupRuntime())
-                .system(lookupSystem())
+                .java(lookupJava(props))
+                .runtime(lookupRuntime(props))
+                .system(lookupSystem(props))
                 .build();
     }
 
-    private String application;
-    private String java;
-    private String runtime;
-    private String system;
+    String application;
+    String java;
+    String runtime;
+    String system;
 
     private static String lookupApplication() {
         return "Beanzooka " + ManifestVersionProvider.get().orElse("...");
     }
 
-    private static String lookupJava() {
-        return System.getProperty("java.version")
-                + "; " + System.getProperty("java.vm.name")
-                + " " + System.getProperty("java.vm.version");
+    private static String lookupJava(SystemProperties p) {
+        return p.getJavaVersion()
+                + "; " + p.getJavaVmName()
+                + " " + p.getJavaVmVersion();
     }
 
-    private static String lookupRuntime() {
+    private static String lookupRuntime(SystemProperties p) {
         return System.getProperty("java.runtime.name")
                 + " " + System.getProperty("java.runtime.version");
     }
 
-    private static String lookupSystem() {
-        return System.getProperty("os.name")
-                + " version " + System.getProperty("os.version")
-                + " running on " + System.getProperty("os.arch")
+    private static String lookupSystem(SystemProperties p) {
+        return p.getOsName()
+                + " version " + p.getOsVersion()
+                + " running on " + p.getOsArch()
                 + "; " + System.getProperty("file.encoding")
                 + "; " + System.getProperty("user.language") + "_" + System.getProperty("user.country");
     }

@@ -88,7 +88,6 @@ public class JFileChoosers {
 
     private void loadCurrentDir(JFileChooser fileChooser, Preferences prefs) {
         Optional.ofNullable(prefs.get(CURRENT_DIRECTORY_KEY, null))
-                .filter(Objects::nonNull)
                 .map(File::new)
                 .ifPresent(fileChooser::setCurrentDirectory);
     }

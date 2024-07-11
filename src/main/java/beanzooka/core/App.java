@@ -34,10 +34,10 @@ import static java.util.stream.Collectors.toList;
 public class App {
 
     @lombok.NonNull
-    private String label;
+    String label;
 
     @lombok.NonNull
-    private File file;
+    File file;
 
     public String getBranding() {
         return getBranding(file);

@@ -170,10 +170,10 @@ public final class ResourcesPanel extends javax.swing.JPanel {
             userDirs.setModel(SwingUtil.modelOf(resources.getUserDirs()));
             plugins.setModel(SwingUtil.modelOf(resources.getPlugins()));
         } else {
-            apps.setModel(new DefaultComboBoxModel());
-            jdks.setModel(new DefaultComboBoxModel());
-            userDirs.setModel(new DefaultComboBoxModel());
-            plugins.setModel(new DefaultComboBoxModel());
+            apps.setModel(new DefaultComboBoxModel<>());
+            jdks.setModel(new DefaultComboBoxModel<>());
+            userDirs.setModel(new DefaultComboBoxModel<>());
+            plugins.setModel(new DefaultComboBoxModel<>());
         }
         updateConfiguration();
     }

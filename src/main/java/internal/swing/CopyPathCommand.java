@@ -17,6 +17,8 @@
 package internal.swing;
 
 import ec.util.various.swing.JCommand;
+import lombok.NonNull;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
@@ -29,13 +31,13 @@ import java.util.Optional;
 public abstract class CopyPathCommand<T> extends JCommand<T> {
 
     @Override
-    public boolean isEnabled(T component) {
+    public boolean isEnabled(@NonNull T component) {
         return getFile(component).isPresent();
     }
 
     @Override
-    public void execute(T component) throws Exception {
-        String path = getFile(component).get().toString();
+    public void execute(@NonNull T component) {
+        String path = getFile(component).orElseThrow(RuntimeException::new).toString();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(path), null);
     }
 

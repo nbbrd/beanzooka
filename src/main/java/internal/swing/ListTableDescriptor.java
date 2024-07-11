@@ -17,6 +17,8 @@
 package internal.swing;
 
 import ec.util.datatransfer.LocalDataTransfer;
+import nbbrd.design.VisibleForTesting;
+
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +148,6 @@ public class ListTableDescriptor<ROW> {
             return MOVE;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             if (!canImport(support)) {
@@ -159,12 +160,12 @@ public class ListTableDescriptor<ROW> {
 
         private void importData(int[] indices, JTable target, JTable.DropLocation dl) {
             int index = computeIndex(dl.getRow(), indices);
-            move(((ListTableModel) target.getModel()).getRows(), indices, index);
+            move(((ListTableModel<?>) target.getModel()).getRows(), indices, index);
             target.getSelectionModel().setSelectionInterval(index, index + indices.length - 1);
         }
     }
 
-    // visible for testing
+    @VisibleForTesting
     static int computeIndex(int dropIndex, int[] indices) {
         int shift = 0;
         for (; shift < indices.length && indices[shift] < dropIndex; shift++) {
@@ -172,9 +173,9 @@ public class ListTableDescriptor<ROW> {
         return dropIndex - shift;
     }
 
-    // visible for testing
-    static void move(List model, int[] selection, int dropIndex) {
-        List reversedItems = new ArrayList(selection.length);
+    @VisibleForTesting
+    static <T> void move(List<T> model, int[] selection, int dropIndex) {
+        List<T> reversedItems = new ArrayList<>(selection.length);
         for (int i = selection.length - 1; i >= 0; i--) {
             reversedItems.add(model.remove(selection[i]));
         }

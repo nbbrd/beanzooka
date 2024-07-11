@@ -42,15 +42,15 @@ import static java.util.stream.Collectors.toList;
 public class Jdk {
 
     @lombok.NonNull
-    private String label;
+    String label;
 
     @lombok.NonNull
-    private File javaHome;
+    File javaHome;
 
-    private String options;
+    String options;
 
     @lombok.Singular
-    private List<File> clusters;
+    List<File> clusters;
 
     public Map<String, String> getConfigFileEntries() {
         Map<String, String> result = new HashMap<>();

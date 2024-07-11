@@ -138,15 +138,15 @@ public final class ListTableModel<ROW> extends AbstractTableModel {
     }
 
     @lombok.Value
-    public static final class Column<ROW, CELL> {
+    public static class Column<ROW, CELL> {
 
         @lombok.NonNull
-        private String name;
+        String name;
 
         @lombok.NonNull
-        private Class<CELL> type;
+        Class<CELL> type;
 
         @lombok.NonNull
-        private Accessor<ROW, CELL> accessor;
+        Accessor<ROW, CELL> accessor;
     }
 }

@@ -38,7 +38,7 @@ import javax.swing.ImageIcon;
 @lombok.experimental.UtilityClass
 public class Beanzooka {
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         File resources = args.length == 1 ? new File(args[0]) : null;
 
         disableDefaultConsoleLogger();

@@ -35,10 +35,10 @@ import static java.util.stream.Collectors.toList;
 public class Plugin {
 
     @lombok.NonNull
-    private String label;
+    String label;
 
     @lombok.NonNull
-    private File file;
+    File file;
 
     public void extract(File folder) throws IOException {
         try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), (ClassLoader) null)) {
