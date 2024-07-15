@@ -1,73 +1,51 @@
 /*
  * Copyright 2018 National Bank of Belgium
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
+ *
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and 
+ * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
 package beanzooka.io;
 
-import beanzooka.core.App;
-import beanzooka.core.Jdk;
-import beanzooka.core.Plugin;
-import beanzooka.core.Resources;
-import beanzooka.core.UserDir;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
+import beanzooka.core.*;
+import nbbrd.io.xml.Stax;
+import nbbrd.io.xml.Xml;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- *
  * @author Philippe Charles
  */
 @lombok.experimental.UtilityClass
 public class XmlResources {
 
+    public static final Xml.Parser<Resources> PARSER = Stax.StreamParser.valueOf(XmlResources::readResources);
+    public static final Xml.Formatter<Resources> FORMATTER = Stax.StreamFormatter.valueOf(XmlResources::writeResources);
+
     @NonNull
-    public Resources read(@NonNull Path file) throws IOException, XMLStreamException {
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        try (Reader reader = Files.newBufferedReader(file)) {
-            XMLStreamReader xml = factory.createXMLStreamReader(reader);
-            try {
-                return readResources(xml);
-            } finally {
-                xml.close();
-            }
-        }
+    public Resources read(@NonNull Path file) throws IOException {
+        return PARSER.parsePath(file);
     }
 
     public void write(@NonNull Path file, @NonNull Resources resources) throws IOException, XMLStreamException {
-        XMLOutputFactory factory = XMLOutputFactory.newFactory();
-        try (Writer writer = Files.newBufferedWriter(file)) {
-            XMLStreamWriter xml = factory.createXMLStreamWriter(writer);
-            try {
-                xml.writeStartDocument();
-                writeResources(xml, resources);
-                xml.writeEndDocument();
-            } finally {
-                xml.close();
-            }
-        }
+        FORMATTER.formatPath(resources, file);
     }
 
     private Resources readResources(XMLStreamReader xml) throws XMLStreamException {
@@ -221,7 +199,7 @@ public class XmlResources {
         throw new RuntimeException();
     }
 
-    private void writeResources(XMLStreamWriter xml, Resources resources) throws XMLStreamException {
+    private void writeResources(Resources resources, XMLStreamWriter xml) throws XMLStreamException {
         xml.writeStartElement(RESOURCES_TAG);
         writeList(xml, JDKS_TAG, resources.getJdks(), XmlResources::writeJdk);
         writeList(xml, APPS_TAG, resources.getApps(), XmlResources::writeApp);

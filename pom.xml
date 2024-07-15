@@ -103,6 +103,11 @@
             <artifactId>java-desktop-util-os</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.nbbrd.java-io-util</groupId>
+            <artifactId>java-io-xml</artifactId>
+            <version>0.0.30</version>
+        </dependency>
+        <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
             <version>3.4.1</version>
