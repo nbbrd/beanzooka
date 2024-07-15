@@ -20,16 +20,21 @@ import beanzooka.core.*;
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
 import internal.swing.*;
+import lombok.NonNull;
+import nbbrd.design.MightBePromoted;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListSelectionEvent;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -50,6 +55,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
     public static final String COPY_PATH_JDKS_ACTION = "copyPathJdks";
     public static final String COPY_PATH_USER_DIRS_ACTION = "copyPathUserDirs";
     public static final String COPY_PATH_PLUGINS_ACTION = "copyPathPlugins";
+    public static final String FILL_ACTION = "fill";
 
     private final EventShield shield;
     private Resources resources;
@@ -97,6 +103,8 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         getActionMap().put(COPY_PATH_USER_DIRS_ACTION, new ComboCopyPath<>(UserDir::getFolder).toAction(userDirs));
         getActionMap().put(COPY_PATH_PLUGINS_ACTION, new ListCopyPath<>(Plugin::getFile).toAction(plugins));
 
+        getActionMap().put(FILL_ACTION, new Fill().toAction(this));
+
         apps.setRenderer(JLists.cellRendererOf(Renderers::renderApp));
         apps.addItemListener(shield.wrap(this::onAppsSelectionChange));
         apps.setComponentPopupMenu(getPopupMenu(EDIT_APPS_ACTION, COPY_PATH_APPS_ACTION));
@@ -121,6 +129,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
 
         addPropertyChangeListener(RESOURCES_PROPERTY, shield.wrap(this::onResourcesChange));
         addPropertyChangeListener(CONFIGURATION_PROPERTY, shield.wrap(this::onConfigurationChange));
+        addPropertyChangeListener("enabled", shield.wrap(this::onEnabledChange));
     }
 
     private JPopupMenu getPopupMenu(String... actionKeys) {
@@ -187,6 +196,15 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         }
     }
 
+    private void onEnabledChange(PropertyChangeEvent event) {
+        boolean enabled = (boolean) event.getNewValue();
+        jdks.setEnabled(enabled);
+        apps.setEnabled(enabled);
+        userDirs.setEnabled(enabled);
+        tempUserDir.setEnabled(enabled);
+        plugins.setEnabled(enabled);
+    }
+
     private void updateConfiguration() {
         if (apps.getSelectedIndex() != -1
                 && jdks.getSelectedIndex() != -1
@@ -196,7 +214,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
                             .builder()
                             .app((App) apps.getSelectedItem())
                             .jdk((Jdk) jdks.getSelectedItem())
-                            .userDir(tempUserDir.isSelected() ? Optional.empty() : Optional.of((UserDir) userDirs.getSelectedItem()))
+                            .userDir(tempUserDir.isSelected() ? Optional.empty() : Optional.ofNullable((UserDir) userDirs.getSelectedItem()))
                             .plugins(plugins.getSelectedValuesList())
                             .build())
             );
@@ -215,7 +233,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public JCommand.ActionAdapter toAction(JList<Plugin> c) {
+        public JCommand.ActionAdapter toAction(@NonNull JList<Plugin> c) {
             ActionAdapter result = super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
             result.putValue(Action.NAME, "Open plugin location");
             return result;
@@ -235,7 +253,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public JCommand.ActionAdapter toAction(JComboBox<T> c) {
+        public JCommand.ActionAdapter toAction(@NonNull JComboBox<T> c) {
             ActionAdapter result = super.toAction(c);
             SwingUtil.addListDataListener(c, SwingUtil.listDataListenerOf(o -> result.refreshActionState()));
             result.putValue(Action.NAME, "Copy path");
@@ -256,10 +274,51 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public JCommand.ActionAdapter toAction(JList<T> c) {
+        public JCommand.ActionAdapter toAction(@NonNull JList<T> c) {
             ActionAdapter result = super.toAction(c).withWeakListSelectionListener(c.getSelectionModel());
             result.putValue(Action.NAME, "Copy path");
             return result;
+        }
+    }
+
+    private static final class Fill extends JCommand<ResourcesPanel> {
+
+        @Override
+        public void execute(@NonNull ResourcesPanel c) {
+            c.setEnabled(false);
+            Resources previous = c.getResources();
+            new SwingWorker<Resources, Void>() {
+                @Override
+                protected Resources doInBackground() {
+                    return Resources
+                            .builder()
+                            .jdks(fillList(JDKS, previous.getJdks()))
+                            .apps(fillList(APPS, previous.getApps()))
+                            .userDirs(fillList(USER_DIRS, previous.getUserDirs()))
+                            .plugins(fillList(PLUGINS, previous.getPlugins()))
+                            .build();
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        c.setResources(get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        ex.printStackTrace();
+                    }
+                    c.setEnabled(true);
+                }
+            }.execute();
+        }
+
+        @MightBePromoted
+        private static <T> List<T> fillList(ListTableDescriptor<T> descriptor, List<T> list) {
+            if (descriptor.isEnableFiller()) {
+                List<T> result = new ArrayList<>(list);
+                descriptor.getValueFiller().accept(result);
+                return result;
+            }
+            return list;
         }
     }
 
@@ -305,7 +364,6 @@ public final class ResourcesPanel extends javax.swing.JPanel {
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
      */
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 

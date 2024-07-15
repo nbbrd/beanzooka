@@ -30,6 +30,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -61,9 +62,21 @@ public final class MainPanel extends javax.swing.JPanel {
         init(NEW_ACTION, new NewCmd().toAction(this), newButton, this, FontAwesome.FA_FILE, "New", "F1");
         init(OPEN_ACTION, new OpenCmd().toAction(this), openButton, this, FontAwesome.FA_FOLDER_OPEN, "Open", "F2");
         init(SAVE_AS_ACTION, new SaveAsCmd().toAction(this), saveAsButton, this, FontAwesome.FA_UPLOAD, "Save as", "F3");
+        init(ResourcesPanel.FILL_ACTION, resources.getActionMap().get(ResourcesPanel.FILL_ACTION), fillButton, this, FontAwesome.FA_MAGIC, "Auto fill", "F4");
         init(LAUNCH_ACTION, new LaunchCmd().toAction(this), launchButton, this, FontAwesome.FA_PLAY_CIRCLE, "Launch", "F5");
         init(SessionsPanel.RELAUNCH_ACTION, sessions.getActionMap().get(SessionsPanel.RELAUNCH_ACTION), relaunchButton, this, FontAwesome.FA_PLAY_CIRCLE_O, "Relaunch", "F6");
         init(ABOUT_ACTION, new AboutCmd().toAction(this), aboutButton, this, FontAwesome.FA_INFO_CIRCLE, "About", "F7");
+
+        resources.addPropertyChangeListener("enabled", this::onResourcesEnabledChange);
+    }
+
+    private void onResourcesEnabledChange(PropertyChangeEvent event) {
+        Boolean enabled = (Boolean) event.getNewValue();
+        newButton.setEnabled(enabled);
+        openButton.setEnabled(enabled);
+        saveAsButton.setEnabled(enabled);
+        fillButton.setEnabled(enabled);
+        launchButton.setEnabled(enabled);
     }
 
     private void init(String id, Action action, JButton button, MainPanel c, FontAwesome icon, String toolTip, String key) {
@@ -216,6 +229,7 @@ public final class MainPanel extends javax.swing.JPanel {
         newButton = new javax.swing.JButton();
         openButton = new javax.swing.JButton();
         saveAsButton = new javax.swing.JButton();
+        fillButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         launchButton = new javax.swing.JButton();
         relaunchButton = new javax.swing.JButton();
@@ -248,6 +262,12 @@ public final class MainPanel extends javax.swing.JPanel {
         saveAsButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         saveAsButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(saveAsButton);
+
+        fillButton.setText("fill");
+        fillButton.setFocusable(false);
+        fillButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        fillButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(fillButton);
         jToolBar1.add(jSeparator1);
 
         launchButton.setText("launch");
@@ -274,30 +294,31 @@ public final class MainPanel extends javax.swing.JPanel {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(resources, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
-                                .addContainerGap())
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(resources, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(resources, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                                .addContainerGap())
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(resources, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sessions, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aboutButton;
+    private javax.swing.JButton fillButton;
     private javax.swing.Box.Filler filler1;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
