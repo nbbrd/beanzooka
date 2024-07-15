@@ -65,6 +65,10 @@ public class App {
         if (!OS.NAME.equals(OS.Name.WINDOWS)) {
             file = new File(file.toString().replace(".exe", ""));
         }
-        return App.builder().label(getBranding(file)).file(file).build();
+        return App
+                .builder()
+                .label(file.getParentFile().getParentFile().getName())
+                .file(file)
+                .build();
     }
 }

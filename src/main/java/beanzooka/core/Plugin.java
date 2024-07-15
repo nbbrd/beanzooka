@@ -58,6 +58,10 @@ public class Plugin {
     }
 
     private static Plugin ofNbm(File file) {
-        return Plugin.builder().label(file.getName()).file(file).build();
+        return Plugin
+                .builder()
+                .label(file.getName().replace(".nbm", ""))
+                .file(file)
+                .build();
     }
 }

@@ -86,13 +86,17 @@ public class Jdk {
     }
 
     public static Optional<Jdk> ofSystemProperty() {
-        Path result = SystemProperties.DEFAULT.getJavaHome();
-        return result != null ? Optional.of(Jdk.builder().label(SystemProperties.JAVA_HOME).javaHome(result.toFile()).build()) : Optional.empty();
+        return Optional
+                .ofNullable(SystemProperties.DEFAULT.getJavaHome())
+                .map(Path::toFile)
+                .map(Jdk::ofFolder);
     }
 
     public static Optional<Jdk> ofEnvironmentVariable() {
-        String javaHome = System.getenv("JAVA_HOME");
-        return javaHome != null ? Optional.of(Jdk.builder().label("JAVA_HOME").javaHome(new File(javaHome)).build()) : Optional.empty();
+        return Optional
+                .ofNullable(System.getenv("JAVA_HOME"))
+                .map(File::new)
+                .map(Jdk::ofFolder);
     }
 
     public static List<Jdk> ofDesktopSearch(Function<String, File[]> engine) {
@@ -110,6 +114,14 @@ public class Jdk {
     }
 
     private static Jdk ofJavaRuntime(File file) {
-        return Jdk.builder().label("javaw").javaHome(file.getParentFile().getParentFile()).build();
+        return ofFolder(file.getParentFile().getParentFile());
+    }
+
+    private static Jdk ofFolder(File javaHome) {
+        return Jdk
+                .builder()
+                .label(javaHome.getName())
+                .javaHome(javaHome)
+                .build();
     }
 }

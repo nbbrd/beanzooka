@@ -26,7 +26,6 @@ import nbbrd.design.MightBePromoted;
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListSelectionEvent;
-import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -35,6 +34,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -290,13 +292,25 @@ public final class ResourcesPanel extends javax.swing.JPanel {
             new SwingWorker<Resources, Void>() {
                 @Override
                 protected Resources doInBackground() {
-                    return Resources
-                            .builder()
-                            .jdks(fillList(JDKS, previous.getJdks()))
-                            .apps(fillList(APPS, previous.getApps()))
-                            .userDirs(fillList(USER_DIRS, previous.getUserDirs()))
-                            .plugins(fillList(PLUGINS, previous.getPlugins()))
-                            .build();
+                    ExecutorService executor = Executors.newCachedThreadPool();
+                    try {
+                        Future<List<Jdk>> jdks = executor.submit(() -> fillList(JDKS, previous.getJdks()));
+                        Future<List<App>> apps = executor.submit(() -> fillList(APPS, previous.getApps()));
+                        Future<List<UserDir>> userDirs = executor.submit(() -> fillList(USER_DIRS, previous.getUserDirs()));
+                        Future<List<Plugin>> plugins = executor.submit(() -> fillList(PLUGINS, previous.getPlugins()));
+                        return Resources
+                                .builder()
+                                .jdks(jdks.get())
+                                .apps(apps.get())
+                                .userDirs(userDirs.get())
+                                .plugins(plugins.get())
+                                .build();
+                    } catch (ExecutionException | InterruptedException ex) {
+                        ex.printStackTrace();
+                        return previous;
+                    } finally {
+                        executor.shutdown();
+                    }
                 }
 
                 @Override
