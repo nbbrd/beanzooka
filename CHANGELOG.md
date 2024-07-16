@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-07-16
+
 ### Added
 
 - Add relaunch button [#318](https://github.com/nbbrd/beanzooka/issues/318)
@@ -55,7 +57,8 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 This is the initial release of **Beanzooka**.   
 Beanzooka follows [semantic versioning](https://semver.org/).
 
-[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nbbrd/beanzooka/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/nbbrd/beanzooka/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/nbbrd/beanzooka/releases/tag/v1.0.0
