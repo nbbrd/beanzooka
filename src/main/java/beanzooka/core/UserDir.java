@@ -32,12 +32,12 @@ public class UserDir {
     public static final UserDir TEMP = UserDir.builder().label("---").folder(new File("")).build();
 
     @lombok.NonNull
-    private String label;
+    String label;
 
     @lombok.NonNull
-    private File folder;
+    File folder;
 
-    private boolean clone;
+    boolean clone;
 
     public static File resolveLogFile(File workingDir) {
         return workingDir.toPath().resolve("var").resolve("log").resolve("messages.log").toFile();

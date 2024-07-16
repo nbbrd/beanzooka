@@ -28,14 +28,14 @@ import java.util.List;
 public class Resources {
 
     @lombok.Singular
-    private List<Jdk> jdks;
+    List<Jdk> jdks;
 
     @lombok.Singular
-    private List<App> apps;
+    List<App> apps;
 
     @lombok.Singular
-    private List<UserDir> userDirs;
+    List<UserDir> userDirs;
 
     @lombok.Singular
-    private List<Plugin> plugins;
+    List<Plugin> plugins;
 }

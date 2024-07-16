@@ -67,7 +67,7 @@ public final class TextCellEditor extends DefaultCellEditor {
         if (onMoreAction != null) {
             JButton moreButton = new JButton();
             moreButton.addActionListener(event -> onMoreAction.accept(getTextField()));
-            moreButton.setText("\u2026");
+            moreButton.setText("…");
             moreButton.setMargin(new Insets(0, 1, 0, 1));
             customComponent.add(moreButton, BorderLayout.EAST);
         }

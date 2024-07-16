@@ -29,13 +29,13 @@ import java.util.Optional;
 @lombok.Builder
 public class Configuration {
 
-    private App app;
+    App app;
 
-    private Jdk jdk;
+    Jdk jdk;
 
-    private Optional<UserDir> userDir;
+    Optional<UserDir> userDir;
 
-    private List<Plugin> plugins;
+    List<Plugin> plugins;
 
     public File init() throws IOException {
         File workingDir = userDir.orElse(UserDir.TEMP).createWorkingDir();

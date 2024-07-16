@@ -19,6 +19,8 @@ package internal.swing;
 import ec.util.desktop.Desktop;
 import ec.util.desktop.DesktopManager;
 import ec.util.various.swing.JCommand;
+import lombok.NonNull;
+
 import java.io.File;
 import java.util.Optional;
 
@@ -31,14 +33,14 @@ public abstract class ShowInFolderCommand<T> extends JCommand<T> {
     private final Desktop desktop = DesktopManager.get();
 
     @Override
-    public boolean isEnabled(T component) {
+    public boolean isEnabled(@NonNull T component) {
         return desktop.isSupported(Desktop.Action.SHOW_IN_FOLDER)
                 && getFile(component).filter(File::exists).isPresent();
     }
 
     @Override
-    public void execute(T component) throws Exception {
-        desktop.showInFolder(getFile(component).get());
+    public void execute(@NonNull T component) throws Exception {
+        desktop.showInFolder(getFile(component).orElseThrow(RuntimeException::new));
     }
 
     abstract protected Optional<File> getFile(T component);

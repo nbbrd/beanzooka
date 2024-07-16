@@ -1,17 +1,17 @@
 /*
  * Copyright 2018 National Bank of Belgium
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved 
+ *
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and 
+ * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
 package beanzooka.swing;
@@ -23,35 +23,27 @@ import beanzooka.core.UserDir;
 import ec.util.completion.FileAutoCompletionSource;
 import ec.util.completion.swing.FileListCellRenderer;
 import ec.util.completion.swing.JAutoCompletion;
+import ec.util.desktop.Desktop;
+import ec.util.desktop.DesktopManager;
 import ec.util.table.swing.JTables;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.StandardSwingColor;
 import ec.util.various.swing.TextPrompt;
-import internal.swing.TableColumnDescriptor;
-import internal.swing.JFileChoosers;
-import internal.swing.ListTableDescriptor;
-import internal.swing.ListTableEdition;
-import internal.swing.SwingUtil;
-import internal.swing.TextCellEditor;
-import java.awt.Color;
+import internal.swing.*;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
-import javax.swing.Icon;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.JTextComponent;
 
 /**
- *
  * @author Philippe Charles
  */
 @lombok.experimental.UtilityClass
@@ -59,15 +51,15 @@ class Renderers {
 
     final TableColumnDescriptor LABEL_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderLabel))
-                    .preferedWidth(100)
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderLabel))
+            .preferedWidth(100)
+            .build();
 
     final TableColumnDescriptor OPTIONS_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
-                    .cellEditor(() -> TextCellEditor.of(o -> o, o -> o, newOptionsField(), Renderers::onMoreOptions))
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderText))
+            .cellEditor(() -> TextCellEditor.of(o -> o, o -> o, newOptionsField(), Renderers::onMoreOptions))
+            .build();
 
     private final String OPTIONS_PROMPT = "options used by the launcher";
 
@@ -90,17 +82,17 @@ class Renderers {
 
     final TableColumnDescriptor FILE_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
-                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(null), o -> Renderers.onMoreFile(o, null)))
-                    .preferedWidth(300)
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
+            .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(null), o -> Renderers.onMoreFile(o, null)))
+            .preferedWidth(300)
+            .build();
 
     final TableColumnDescriptor PLUGIN_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
-                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(PLUGIN_FILTER::accept), o -> Renderers.onMoreFile(o, PLUGIN_FILTER)))
-                    .preferedWidth(300)
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFile))
+            .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFileField(PLUGIN_FILTER::accept), o -> Renderers.onMoreFile(o, PLUGIN_FILTER)))
+            .preferedWidth(300)
+            .build();
 
     private JTextField newFileField(java.io.FileFilter optionalFileFilter) {
         JTextField result = new JTextField();
@@ -123,9 +115,9 @@ class Renderers {
 
     final TableColumnDescriptor CLUSTERS_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
-                    .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField(), Renderers::onMoreClusters))
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderClusters))
+            .cellEditor(() -> TextCellEditor.of(Jdk::fromFiles, Jdk::toFiles, newClustersField(), Renderers::onMoreClusters))
+            .build();
 
     private JTextField newClustersField() {
         JTextField result = new JTextField();
@@ -147,10 +139,10 @@ class Renderers {
 
     final TableColumnDescriptor FOLDER_DESCRIPTOR
             = TableColumnDescriptor.builder()
-                    .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
-                    .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFolderField(), Renderers::onMoreFolder))
-                    .preferedWidth(300)
-                    .build();
+            .cellRenderer(() -> JTables.cellRendererOf(Renderers::renderFolder))
+            .cellEditor(() -> TextCellEditor.of(File::getPath, File::new, newFolderField(), Renderers::onMoreFolder))
+            .preferedWidth(300)
+            .build();
 
     private JTextField newFolderField() {
         JTextField result = new JTextField();
@@ -300,6 +292,16 @@ class Renderers {
                 : App.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
+    public void fillApp(List<App> list) {
+        App.ofDesktopSearch(Renderers::search).forEach(e -> appendAppIfAbsent(list, e));
+    }
+
+    private void appendAppIfAbsent(List<App> list, App item) {
+        if (item != null && list.stream().noneMatch(o -> o.getFile().equals(item.getFile()))) {
+            list.add(item);
+        }
+    }
+
     public Jdk newJdk() {
         File folder = open(Jdk.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null
@@ -308,9 +310,14 @@ class Renderers {
     }
 
     public void fillJdk(List<Jdk> list) {
-        String javaHome = System.getProperty("java.home");
-        if (javaHome != null && list.stream().noneMatch(jdk -> jdk.getJavaHome().toString().equalsIgnoreCase(javaHome))) {
-            list.add(Jdk.builder().label("java home").javaHome(new File(javaHome)).build());
+        Jdk.ofSystemProperty().ifPresent(e -> appendJdkIfAbsent(list, e));
+        Jdk.ofEnvironmentVariable().ifPresent(e -> appendJdkIfAbsent(list, e));
+        Jdk.ofDesktopSearch(Renderers::search).forEach(e -> appendJdkIfAbsent(list, e));
+    }
+
+    private void appendJdkIfAbsent(List<Jdk> list, Jdk item) {
+        if (item != null && list.stream().noneMatch(o -> o.getJavaHome().equals(item.getJavaHome()))) {
+            list.add(item);
         }
     }
 
@@ -328,6 +335,16 @@ class Renderers {
                 : Plugin.builder().label(randomLabel()).file(EMPTY_FILE).build();
     }
 
+    public void fillPlugin(List<Plugin> list) {
+        Plugin.ofDesktopSearch(Renderers::search).forEach(e -> appendPluginIfAbsent(list, e));
+    }
+
+    private void appendPluginIfAbsent(List<Plugin> list, Plugin item) {
+        if (item != null && list.stream().noneMatch(o -> o.getFile().equals(item.getFile()))) {
+            list.add(item);
+        }
+    }
+
     public File newCluster() {
         File folder = open(ClusterFile.class, JFileChooser.DIRECTORIES_ONLY, null);
         return folder != null ? folder : EMPTY_FILE;
@@ -341,5 +358,16 @@ class Renderers {
     }
 
     private static final class ClusterFile {
+    }
+
+    private File[] search(String query) {
+        Desktop desktop = DesktopManager.get();
+        if (desktop.isSupported(Desktop.Action.SEARCH)) {
+            try {
+                return desktop.search(query);
+            } catch (IOException ignore) {
+            }
+        }
+        return new File[0];
     }
 }

@@ -18,6 +18,8 @@ package internal.swing;
 
 import ec.util.list.swing.JLists;
 import ec.util.various.swing.JCommand;
+import lombok.NonNull;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -71,12 +73,12 @@ public class ListTableActions {
     private static abstract class ListTableCommand<ROW> extends JCommand<JTable> {
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return component.getModel() instanceof ListTableModel;
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakPropertyChangeListener(component, "model");
         }
@@ -93,7 +95,7 @@ public class ListTableActions {
         private final Supplier<ROW> valueSupplier;
 
         @Override
-        public void execute(JTable component) throws Exception {
+        public void execute(@NonNull JTable component) {
             getModel(component).getRows().add(valueSupplier.get());
         }
     }
@@ -105,22 +107,22 @@ public class ListTableActions {
         private final UnaryOperator<ROW> valueDuplicator;
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return super.isEnabled(component)
                     && !component.getSelectionModel().isSelectionEmpty();
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
+        public void execute(@NonNull JTable component) {
             int[] selection = JLists.getSelectionIndexStream(component.getSelectionModel()).toArray();
-            for (int i = 0; i < selection.length; i++) {
+            for (int index : selection) {
                 List<ROW> rows = getModel(component).getRows();
-                rows.add(valueDuplicator.apply(rows.get(selection[i])));
+                rows.add(valueDuplicator.apply(rows.get(index)));
             }
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
         }
@@ -134,12 +136,12 @@ public class ListTableActions {
         private final boolean enableFiller;
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return enableFiller;
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
+        public void execute(@NonNull JTable component) {
             valueFiller.accept(getModel(component).getRows());
         }
     }
@@ -147,13 +149,13 @@ public class ListTableActions {
     private static final class RemoveCommand extends ListTableCommand<Object> {
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return super.isEnabled(component)
                     && !component.getSelectionModel().isSelectionEmpty();
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
+        public void execute(@NonNull JTable component) {
             int[] selection = JLists.getSelectionIndexStream(component.getSelectionModel()).toArray();
             for (int i = 0; i < selection.length; i++) {
                 getModel(component).getRows().remove(selection[selection.length - i - 1]);
@@ -161,7 +163,7 @@ public class ListTableActions {
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
         }
@@ -170,19 +172,19 @@ public class ListTableActions {
     private static final class ClearCommand extends ListTableCommand<Object> {
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return super.isEnabled(component)
                     && !getModel(component).getRows().isEmpty();
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
+        public void execute(@NonNull JTable component) {
             getModel(component).getRows().clear();
             component.getSelectionModel().clearSelection();
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
         }
@@ -191,15 +193,15 @@ public class ListTableActions {
     private static final class MoveUpCommand extends ListTableCommand<Object> {
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return super.isEnabled(component)
                     && JLists.isSingleSelectionIndex(component.getSelectionModel())
                     && component.getSelectedRow() > 0;
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
-            ListTableModel model = getModel(component);
+        public void execute(@NonNull JTable component) {
+            ListTableModel<Object> model = getModel(component);
             int index = component.getSelectedRow();
             Object value = model.getRows().remove(index);
             model.getRows().add(index - 1, value);
@@ -207,7 +209,7 @@ public class ListTableActions {
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
         }
@@ -216,15 +218,15 @@ public class ListTableActions {
     private static final class MoveDownCommand extends ListTableCommand<Object> {
 
         @Override
-        public boolean isEnabled(JTable component) {
+        public boolean isEnabled(@NonNull JTable component) {
             return super.isEnabled(component)
                     && JLists.isSingleSelectionIndex(component.getSelectionModel())
                     && component.getSelectedRow() < getModel(component).getRows().size() - 1;
         }
 
         @Override
-        public void execute(JTable component) throws Exception {
-            ListTableModel model = getModel(component);
+        public void execute(@NonNull JTable component) {
+            ListTableModel<Object> model = getModel(component);
             int index = component.getSelectedRow();
             Object value = model.getRows().remove(index);
             model.getRows().add(index + 1, value);
@@ -232,7 +234,7 @@ public class ListTableActions {
         }
 
         @Override
-        public ActionAdapter toAction(JTable component) {
+        public @NonNull ActionAdapter toAction(@NonNull JTable component) {
             return super.toAction(component)
                     .withWeakListSelectionListener(component.getSelectionModel());
         }

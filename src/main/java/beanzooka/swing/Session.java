@@ -46,7 +46,7 @@ public class Session {
 
     public void execute() {
         if (worker == null || worker.getState() == SwingWorker.StateValue.DONE) {
-            this.worker = new SwingWorker() {
+            this.worker = new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     try {
