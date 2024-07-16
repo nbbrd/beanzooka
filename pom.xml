@@ -219,6 +219,11 @@
                     <artifactId>jreleaser-maven-plugin</artifactId>
                     <version>1.13.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>templating-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -315,6 +320,20 @@
                     <shadedClassifierName>bin</shadedClassifierName>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
+            </plugin>
+            <!-- Generates About.java -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-aboutSummary</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

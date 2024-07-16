@@ -16,14 +16,16 @@
  */
 package beanzooka.swing;
 
+import beanzooka.About;
 import beanzooka.core.Resources;
 import beanzooka.io.XmlResources;
 import ec.util.various.swing.FontAwesome;
 import ec.util.various.swing.JCommand;
-import internal.swing.About;
+import internal.swing.AboutBox;
 import internal.swing.FixedImageIcon;
 import internal.swing.JFileChoosers;
 import internal.swing.SwingUtil;
+import lombok.NonNull;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -136,8 +138,8 @@ public final class MainPanel extends javax.swing.JPanel {
     private static abstract class CustomCommand extends JCommand<MainPanel> {
 
         @Override
-        public ActionAdapter toAction(MainPanel component) {
-            return new ActionAdapterWithExceptionDialog(component);
+        public ActionAdapter toAction(@NonNull MainPanel c) {
+            return new ActionAdapterWithExceptionDialog(c);
         }
 
         private class ActionAdapterWithExceptionDialog extends ActionAdapter {
@@ -171,7 +173,7 @@ public final class MainPanel extends javax.swing.JPanel {
     private static final class OpenCmd extends CustomCommand {
 
         @Override
-        public void execute(MainPanel c) throws Exception {
+        public void execute(@NonNull MainPanel c) throws Exception {
             JFileChooser fileChooser = newResourcesFileChooser();
             Optional<File> file = JFileChoosers.getOpenFile(fileChooser, c);
             if (file.isPresent()) {
@@ -183,7 +185,7 @@ public final class MainPanel extends javax.swing.JPanel {
     private static final class SaveAsCmd extends CustomCommand {
 
         @Override
-        public void execute(MainPanel c) throws Exception {
+        public void execute(@NonNull MainPanel c) throws Exception {
             JFileChooser fileChooser = newResourcesFileChooser();
             Optional<File> file = JFileChoosers.getSaveFile(fileChooser, c);
             if (file.isPresent()) {
@@ -202,12 +204,12 @@ public final class MainPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public boolean isEnabled(MainPanel c) {
+        public boolean isEnabled(@NonNull MainPanel c) {
             return c.resources.getConfiguration().isPresent();
         }
 
         @Override
-        public ActionAdapter toAction(MainPanel c) {
+        public ActionAdapter toAction(@NonNull MainPanel c) {
             return super.toAction(c)
                     .withWeakPropertyChangeListener(c.resources, ResourcesPanel.CONFIGURATION_PROPERTY);
         }
@@ -216,24 +218,9 @@ public final class MainPanel extends javax.swing.JPanel {
     private static final class AboutCmd extends CustomCommand {
 
         @Override
-        public void execute(MainPanel c) throws Exception {
-            JTextPane html = new JTextPane();
-            html.setContentType("text/html");
-            html.setText(toHtml(About.lookup()));
-            html.setEditable(false);
-
+        public void execute(@NonNull MainPanel c) {
             Icon icon = new FixedImageIcon(new ImageIcon(MainPanel.class.getResource("/beanzooka/beanzooka_redux_32.png")));
-            JOptionPane.showMessageDialog(c, new JScrollPane(html), "About", JOptionPane.INFORMATION_MESSAGE, icon);
-        }
-
-        private String toHtml(About about) {
-            return new StringBuilder()
-                    .append("<html>")
-                    .append("<b>Application:</b> ").append(about.getApplication()).append("<br>")
-                    .append("<b>Java:</b> ").append(about.getJava()).append("<br>")
-                    .append("<b>Runtime:</b> ").append(about.getRuntime()).append("<br>")
-                    .append("<b>System:</b> ").append(about.getSystem()).append("<br>")
-                    .toString();
+            AboutBox.showDialog(c, About.getName(), About.getVersion(), icon);
         }
     }
 

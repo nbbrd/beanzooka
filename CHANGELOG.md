@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Add relaunch button [#318](https://github.com/nbbrd/beanzooka/issues/318)
 - Add auto-fill actions [#320](https://github.com/nbbrd/beanzooka/issues/320)
 - Add auto reload of latest workspace [#321](https://github.com/nbbrd/beanzooka/issues/321)
+
+### Fixed
+
+- Fix version in title bar [#319](https://github.com/nbbrd/beanzooka/issues/319)
 
 ## [1.2.0] - 2024-06-04
 

@@ -19,7 +19,6 @@ package beanzooka;
 import beanzooka.swing.MainPanel;
 import com.formdev.flatlaf.FlatLightLaf;
 import ec.util.various.swing.BasicSwingLauncher;
-import internal.swing.ManifestVersionProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,7 +45,7 @@ public class Beanzooka {
         new BasicSwingLauncher()
                 .lookAndFeel(FlatLightLaf.class.getName())
                 .content(() -> createContent(resources))
-                .title("Beanzooka " + ManifestVersionProvider.get().orElse("..."))
+                .title(About.getName() + " " + About.getVersion())
                 .icons(Beanzooka::getIcons)
                 .size(600, 400)
                 .launch();
