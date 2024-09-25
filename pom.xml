@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.github.nbbrd.java-io-util</groupId>
             <artifactId>java-io-xml</artifactId>
-            <version>0.0.30</version>
+            <version>0.0.31</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
