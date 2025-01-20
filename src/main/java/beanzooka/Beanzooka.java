@@ -23,6 +23,7 @@ import ec.util.various.swing.BasicSwingLauncher;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -37,7 +38,7 @@ import java.util.stream.IntStream;
 public class Beanzooka {
 
     public static void main(String[] args) {
-        File resources = args.length == 1 ? new File(args[0]) : null;
+        File resources = args.length == 1 ? Paths.get(args[0]).toFile() : null;
 
         disableDefaultConsoleLogger();
         FlatLightLaf.setup();

@@ -19,6 +19,7 @@ package beanzooka.core;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  *
@@ -29,7 +30,7 @@ import java.nio.file.Files;
 @lombok.With
 public class UserDir {
 
-    public static final UserDir TEMP = UserDir.builder().label("---").folder(new File("")).build();
+    public static final UserDir TEMP = UserDir.builder().label("---").folder(Paths.get("").toFile()).build();
 
     @lombok.NonNull
     String label;

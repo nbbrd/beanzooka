@@ -27,6 +27,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +84,7 @@ public class XmlResources {
                             result.label(xml.getElementText());
                             break;
                         case JAVA_HOME_TAG:
-                            result.javaHome(new File(xml.getElementText()));
+                            result.javaHome(Paths.get(xml.getElementText()).toFile());
                             break;
                         case OPTIONS_TAG:
                             result.options(xml.getElementText());
@@ -110,7 +111,7 @@ public class XmlResources {
                 case XMLStreamReader.START_ELEMENT:
                     switch (xml.getLocalName()) {
                         case CLUSTER_TAG:
-                            result.add(new File(xml.getElementText()));
+                            result.add(Paths.get(xml.getElementText()).toFile());
                             break;
                     }
                     break;
@@ -134,7 +135,7 @@ public class XmlResources {
                             result.label(xml.getElementText());
                             break;
                         case FILE_TAG:
-                            result.file(new File(xml.getElementText()));
+                            result.file(Paths.get(xml.getElementText()).toFile());
                             break;
                     }
                     break;
@@ -158,7 +159,7 @@ public class XmlResources {
                             result.label(xml.getElementText());
                             break;
                         case FOLDER_TAG:
-                            result.folder(new File(xml.getElementText()));
+                            result.folder(Paths.get(xml.getElementText()).toFile());
                             break;
                         case CLONE_TAG:
                             result.clone(Boolean.parseBoolean(xml.getElementText()));
@@ -185,7 +186,7 @@ public class XmlResources {
                             result.label(xml.getElementText());
                             break;
                         case FILE_TAG:
-                            result.file(new File(xml.getElementText()));
+                            result.file(Paths.get(xml.getElementText()).toFile());
                             break;
                     }
                     break;
