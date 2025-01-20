@@ -38,6 +38,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -109,7 +110,7 @@ class Renderers {
             result.setFileFilter(optionalFileFilter);
         }
         result.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        result.setSelectedFile(new File(textField.getText()));
+        result.setSelectedFile(Paths.get(textField.getText()).toFile());
         JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
     }
 
@@ -156,7 +157,7 @@ class Renderers {
     private void onMoreFolder(JTextField textField) {
         JFileChooser result = new JFileChooser();
         result.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        result.setSelectedFile(new File(textField.getText()));
+        result.setSelectedFile(Paths.get(textField.getText()).toFile());
         JFileChoosers.getOpenFile(result, textField).map(File::getPath).ifPresent(textField::setText);
     }
 
@@ -279,7 +280,7 @@ class Renderers {
         return JFileChoosers.getOpenFile(fileChooser, null).orElse(null);
     }
 
-    private final File EMPTY_FILE = new File("");
+    private final File EMPTY_FILE = Paths.get("").toFile();
 
     private String randomLabel() {
         return UUID.randomUUID().toString().substring(0, 8);
