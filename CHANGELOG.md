@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add version parameter to Main method [#393](https://github.com/nbbrd/beanzooka/issues/393)
 
+### Fixed
+
+- Fix auto reload of latest workspace if input file is not found [#394](https://github.com/nbbrd/beanzooka/issues/394)
+
 ### Changed
 
 - Modernize use of NIO API

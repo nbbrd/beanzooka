@@ -109,22 +109,26 @@ public final class MainPanel extends javax.swing.JPanel {
     private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Resources.class).node(Resources.class.getSimpleName());
 
     public void reload(File file) {
+        resources.setResources(loadResources(file));
+    }
+
+    private static Resources loadResources(File file) {
         if (file != null) {
             try {
-                resources.setResources(XmlResources.PARSER.parseFile(file));
+                return XmlResources.PARSER.parseFile(file);
             } catch (IOException ex) {
                 reportException(ex);
             }
-        } else {
-            String latest = MainPanel.PREFERENCES.get("LATEST", null);
-            if (latest != null) {
-                try {
-                    resources.setResources(XmlResources.PARSER.parseChars(latest));
-                } catch (IOException ex) {
-                    reportException(ex);
-                }
+        }
+        String latest = MainPanel.PREFERENCES.get("LATEST", null);
+        if (latest != null) {
+            try {
+                return XmlResources.PARSER.parseChars(latest);
+            } catch (IOException ex) {
+                reportException(ex);
             }
         }
+        return Resources.builder().build();
     }
 
     public static void reportException(Exception ex) {
