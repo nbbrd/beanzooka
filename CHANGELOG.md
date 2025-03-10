@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add version parameter to Main method [#393](https://github.com/nbbrd/beanzooka/issues/393)
+- Add deployment to Maven Central [#392](https://github.com/nbbrd/beanzooka/issues/392)
 
 ### Fixed
 
