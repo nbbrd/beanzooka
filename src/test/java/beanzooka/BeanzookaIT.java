@@ -5,6 +5,7 @@ import nbbrd.io.sys.SystemProperties;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +22,7 @@ class BeanzookaIT {
 
     @Test
     void testVersion() throws IOException {
-        Path uberjar = Paths.get("target").resolve(About.getName() + "-" + About.getVersion() + "-bin.jar");
+        Path uberjar = Paths.get("target").resolve("beanzooka-" + About.getVersion() + "-bin.jar");
         assertThat(uberjar).existsNoFollowLinks().isRegularFile();
 
         JavaRuntime javaRuntime = JavaRuntime.ofDefault();
@@ -52,8 +53,12 @@ class BeanzookaIT {
         }
 
         public String getJavaVersion() throws IOException {
+            Path release = javaHome.resolve("release");
+            if (!Files.isRegularFile(release)) return "";
             Properties properties = new Properties();
-            properties.load(Files.newInputStream(javaHome.resolve("release")));
+            try (InputStream stream = Files.newInputStream(release)) {
+                properties.load(stream);
+            }
             return properties.getProperty("JAVA_VERSION", "").replace("\"", "");
         }
     }
