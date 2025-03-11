@@ -5,7 +5,7 @@
 
     <groupId>com.github.nbbrd.beanzooka</groupId>
     <artifactId>beanzooka</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Beanzooka</name>
@@ -38,7 +38,7 @@
     <properties>
         <!-- Java 8+ config -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.outputTimestamp>2025-03-11T09:25:48Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-03-11T09:25:53Z</project.build.outputTimestamp>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
