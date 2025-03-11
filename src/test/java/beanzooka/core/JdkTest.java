@@ -18,6 +18,5 @@ class JdkTest {
                 .hasSize(1)
                 .element(0)
                 .returns(Paths.get("C:\\some\\path\\jdk-21+35").toFile(), Jdk::getJavaHome);
-        ;
     }
 }

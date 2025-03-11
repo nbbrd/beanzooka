@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add relaunch button [#318](https://github.com/nbbrd/beanzooka/issues/318)
-- Add auto-fill actions [#320](https://github.com/nbbrd/beanzooka/issues/320)
+- Add autofill actions [#320](https://github.com/nbbrd/beanzooka/issues/320)
 - Add auto reload of latest workspace [#321](https://github.com/nbbrd/beanzooka/issues/321)
 
 ### Fixed
@@ -50,7 +50,7 @@ This is a feature release of **Beanzooka**.
 Beanzooka follows [semantic versioning](https://semver.org/).
 
 ### Added
-- Add auto-fill in editor
+- Add autofill in editor
 - Add file filter in editor
 - Add relaunch command on session panel
 - Add 'copy path' to contextual menu

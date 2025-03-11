@@ -48,7 +48,7 @@ public class Session {
         if (worker == null || worker.getState() == SwingWorker.StateValue.DONE) {
             this.worker = new SwingWorker<Void, Void>() {
                 @Override
-                protected Void doInBackground() throws Exception {
+                protected Void doInBackground() {
                     try {
                         configuration.launch(workingDir);
                     } catch (Exception ex) {

@@ -45,7 +45,7 @@ public class XmlResources {
         return PARSER.parsePath(file);
     }
 
-    public void write(@NonNull Path file, @NonNull Resources resources) throws IOException, XMLStreamException {
+    public void write(@NonNull Path file, @NonNull Resources resources) throws IOException {
         FORMATTER.formatPath(resources, file);
     }
 

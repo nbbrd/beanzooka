@@ -42,7 +42,7 @@ All sessions (both running and stopped) are displayed at the bottom of the windo
 
 ## Automation
 
-It is possible to launch Beanzooka with pre-loaded resources by using the command line.  
+It is possible to launch Beanzooka with preloaded resources by using the command line.  
 For example: `beanzooka.exe D:\some_resources.xml`
 
 ## Developing
