@@ -19,16 +19,20 @@ package beanzooka;
 import beanzooka.swing.MainPanel;
 import com.formdev.flatlaf.FlatLightLaf;
 import ec.util.various.swing.BasicSwingLauncher;
+import nbbrd.io.sys.SystemProperties;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @author Philippe Charles
@@ -37,7 +41,12 @@ import java.util.stream.IntStream;
 public class Beanzooka {
 
     public static void main(String[] args) {
-        File resources = args.length == 1 ? new File(args[0]) : null;
+        if (Arrays.asList(args).contains("--version")) {
+            Stream.of(getVersion()).forEach(System.out::println);
+            return;
+        }
+
+        File resources = args.length == 1 ? Paths.get(args[0]).toFile() : null;
 
         disableDefaultConsoleLogger();
         FlatLightLaf.setup();
@@ -75,5 +84,14 @@ public class Beanzooka {
                 }
             }
         }
+    }
+
+    private static String[] getVersion() {
+        SystemProperties sys = SystemProperties.DEFAULT;
+        return new String[]{
+                About.getName() + " " + About.getVersion(),
+                "JVM: " + sys.getJavaVersion() + " (" + sys.getJavaVendor() + " " + sys.getJavaVmName() + " " + sys.getJavaVmVersion() + ")",
+                "OS: " + sys.getOsName() + " " + sys.getOsVersion() + " " + sys.getOsArch()
+        };
     }
 }

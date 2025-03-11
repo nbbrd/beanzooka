@@ -19,6 +19,7 @@ package beanzooka.core;
 import nbbrd.io.sys.OS;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ public class App {
 
     private static App ofNetBeansPlatform(File file) {
         if (!OS.NAME.equals(OS.Name.WINDOWS)) {
-            file = new File(file.toString().replace(".exe", ""));
+            file = Paths.get(file.toString().replace(".exe", "")).toFile();
         }
         return App
                 .builder()
