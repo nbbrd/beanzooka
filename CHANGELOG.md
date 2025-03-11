@@ -1,10 +1,13 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.4.0] - 2025-03-11
 
 ### Added
 
@@ -34,13 +37,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2024-06-04
 
 ### Added
+
 - Add distribution to Scoop (Windows)
 - Add distribution to Homebrew (macOS & Linux)
 
 ### Fixed
+
 - Fix reordering by dnd [#32](https://github.com/nbbrd/beanzooka/issues/32)
 
 ### Changed
+
 - Remove specific binary for Windows
 - Change look&feel to FlatLightLaf [#138](https://github.com/nbbrd/beanzooka/issues/138)
 
@@ -50,6 +56,7 @@ This is a feature release of **Beanzooka**.
 Beanzooka follows [semantic versioning](https://semver.org/).
 
 ### Added
+
 - Add autofill in editor
 - Add file filter in editor
 - Add relaunch command on session panel
@@ -60,6 +67,7 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 - Add splashscreen when using bin.jar
 
 ### Fixed
+
 - Fix detection of portable Java by using %JAVA_HOME% variable on Windows
 - Fix default console logger
 - Fix missing icon in editor
@@ -70,7 +78,8 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 This is the initial release of **Beanzooka**.   
 Beanzooka follows [semantic versioning](https://semver.org/).
 
-[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nbbrd/beanzooka/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/nbbrd/beanzooka/compare/v1.0.0...v1.1.0
