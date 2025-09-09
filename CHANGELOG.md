@@ -82,6 +82,10 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 This is the initial release of **Beanzooka**.   
 Beanzooka follows [semantic versioning](https://semver.org/).
 
+### Added
+
+- Initial release
+
 [Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...HEAD
 [1.4.0]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...v1.3.0
