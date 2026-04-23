@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add UI selection persistence between sessions [#512](https://github.com/nbbrd/beanzooka/issues/512)
+
 ### Changed
 
 - Migrate OSSRH to Central Portal

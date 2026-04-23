@@ -97,7 +97,7 @@ public final class MainPanel extends javax.swing.JPanel {
     private boolean canClose() {
         if (!sessions.isRunning() || JOptionPane.showConfirmDialog(MainPanel.this, "Some sessions are still running.\nDo you want to close the application anyway?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
-                MainPanel.PREFERENCES.put("LATEST", XmlResources.FORMATTER.formatToString(this.resources.getResources()));
+                MainPanel.PREFERENCES.put("LATEST", XmlResources.FORMATTER.formatToString(this.resources.getResourcesWithSelection()));
             } catch (IOException ex) {
                 reportException(ex);
             }
@@ -193,7 +193,7 @@ public final class MainPanel extends javax.swing.JPanel {
             JFileChooser fileChooser = newResourcesFileChooser();
             Optional<File> file = JFileChoosers.getSaveFile(fileChooser, c);
             if (file.isPresent()) {
-                XmlResources.write(file.get().toPath(), c.resources.getResources());
+                XmlResources.write(file.get().toPath(), c.resources.getResourcesWithSelection());
             }
         }
     }
