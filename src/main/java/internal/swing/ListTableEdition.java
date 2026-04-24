@@ -93,9 +93,14 @@ public class ListTableEdition<ROW, C extends Component> {
     }
 
     private static boolean show(Component parent, JTable table, String title) {
+        List<?> original = new java.util.ArrayList<>(((ListTableModel<?>) table.getModel()).getRows());
+        DiffBarOverlay diffBar = new DiffBarOverlay(original, table);
+        table.getModel().addTableModelListener(diffBar);
+
         JPanel panel = new JPanel(new BorderLayout());
 
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(diffBar, BorderLayout.EAST);
         panel.add(createToolBar(table.getActionMap()), BorderLayout.NORTH);
 
         return SwingUtil.showOkCancelDialog(parent, panel, title);

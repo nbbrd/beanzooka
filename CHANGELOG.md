@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add UI selection persistence between sessions [#512](https://github.com/nbbrd/beanzooka/issues/512)
+- Add diff bar overlay in list editor [#513](https://github.com/nbbrd/beanzooka/issues/513)
 
 ### Changed
 
