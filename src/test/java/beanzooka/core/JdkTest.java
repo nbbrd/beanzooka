@@ -14,9 +14,13 @@ class JdkTest {
     @Test
     @EnabledOnOs(OS.WINDOWS)
     void ofDesktopSearch() {
-        assertThat(Jdk.ofDesktopSearch(ignore -> new File[]{Paths.get("C:\\some\\path\\jdk-21+35\\bin\\javaw.exe").toFile()}))
+        assertThat(new Jdk.DesktopSearch(JdkTest::fakeSearch).findResources())
                 .hasSize(1)
                 .element(0)
                 .returns(Paths.get("C:\\some\\path\\jdk-21+35").toFile(), Jdk::getJavaHome);
+    }
+
+    private static File[] fakeSearch(String ignore) {
+        return new File[]{Paths.get("C:\\some\\path\\jdk-21+35\\bin\\javaw.exe").toFile()};
     }
 }

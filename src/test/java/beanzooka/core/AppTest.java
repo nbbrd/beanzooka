@@ -14,9 +14,13 @@ class AppTest {
     @Test
     @EnabledOnOs(OS.WINDOWS)
     void ofDesktopSearch() {
-        assertThat(App.ofDesktopSearch(ignore -> new File[]{Paths.get("C:\\some\\path\\jdemetra-3.2.2-windows-bin\\bin\\nbdemetra64.exe").toFile()}))
+        assertThat(new App.DesktopSearch(AppTest::fakeSearch).findResources())
                 .hasSize(1)
                 .element(0)
                 .returns(Paths.get("C:\\some\\path\\jdemetra-3.2.2-windows-bin\\bin\\nbdemetra64.exe").toFile(), App::getFile);
+    }
+
+    private static File[] fakeSearch(String ignore) {
+        return new File[]{Paths.get("C:\\some\\path\\jdemetra-3.2.2-windows-bin\\bin\\nbdemetra64.exe").toFile()};
     }
 }

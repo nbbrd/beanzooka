@@ -294,7 +294,7 @@ class Renderers {
     }
 
     public void fillApp(List<App> list) {
-        App.ofDesktopSearch(Renderers::search).forEach(e -> appendAppIfAbsent(list, e));
+        App.findApps(Renderers::search).forEach(e -> appendAppIfAbsent(list, e));
     }
 
     private void appendAppIfAbsent(List<App> list, App item) {
@@ -311,9 +311,7 @@ class Renderers {
     }
 
     public void fillJdk(List<Jdk> list) {
-        Jdk.ofSystemProperty().ifPresent(e -> appendJdkIfAbsent(list, e));
-        Jdk.ofEnvironmentVariable().ifPresent(e -> appendJdkIfAbsent(list, e));
-        Jdk.ofDesktopSearch(Renderers::search).forEach(e -> appendJdkIfAbsent(list, e));
+        Jdk.findJdks(Renderers::search).forEach(e -> appendJdkIfAbsent(list, e));
     }
 
     private void appendJdkIfAbsent(List<Jdk> list, Jdk item) {
@@ -337,7 +335,7 @@ class Renderers {
     }
 
     public void fillPlugin(List<Plugin> list) {
-        Plugin.ofDesktopSearch(Renderers::search).forEach(e -> appendPluginIfAbsent(list, e));
+        Plugin.findPlugins(Renderers::search).forEach(e -> appendPluginIfAbsent(list, e));
     }
 
     private void appendPluginIfAbsent(List<Plugin> list, Plugin item) {
