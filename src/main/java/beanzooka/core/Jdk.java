@@ -20,11 +20,16 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import nbbrd.design.StaticFactoryMethod;
 import nbbrd.design.VisibleForTesting;
+import nbbrd.io.sys.OS;
+import nbbrd.io.sys.ProcessReader;
 import nbbrd.io.sys.SystemProperties;
+import nbbrd.io.win.WhereWrapper;
 import org.jspecify.annotations.Nullable;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -105,7 +110,8 @@ public class Jdk {
         return ResourceFinder.findResources(List.of(
                 new JavaHomeProperty(),
                 new JavaHomeEnv(),
-                new DesktopSearch(engine)
+                new DesktopSearch(engine),
+                new WhereSearch()
         ));
     }
 
@@ -142,6 +148,31 @@ public class Jdk {
                 .builder()
                 .runtime(() -> getEngine().apply("javaw"))
                 .build();
+    }
+
+    @VisibleForTesting
+    static final class WhereSearch implements ResourceFinder<Jdk> {
+
+        @lombok.experimental.Delegate
+        private final JavaRuntimeSupport delegate = JavaRuntimeSupport
+                .builder()
+                .runtime(WhereSearch::where)
+                .build();
+
+        private static File[] where() {
+            if (OS.NAME.equals(OS.Name.WINDOWS)) {
+                try {
+                    Process p = new ProcessBuilder(WhereWrapper.COMMAND, "javaw")
+                            .redirectError(ProcessBuilder.Redirect.INHERIT)
+                            .start();
+                    try (BufferedReader reader = ProcessReader.newReader(Charset.defaultCharset(), p)) {
+                        return reader.lines().map(File::new).toArray(File[]::new);
+                    }
+                } catch (IOException ignore) {
+                }
+            }
+            return new File[0];
+        }
     }
 
     @lombok.Builder

@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class JdkTest {
 
@@ -22,5 +23,11 @@ class JdkTest {
 
     private static File[] fakeSearch(String ignore) {
         return new File[]{Paths.get("C:\\some\\path\\jdk-21+35\\bin\\javaw.exe").toFile()};
+    }
+
+    @Test
+    void testWhere() {
+        assertThatCode(() -> new Jdk.WhereSearch().findResources())
+                .doesNotThrowAnyException();
     }
 }
