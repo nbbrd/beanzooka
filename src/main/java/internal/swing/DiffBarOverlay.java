@@ -9,6 +9,8 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import nbbrd.design.VisibleForTesting;
+
 /**
  * A narrow vertical strip placed beside a table that shows an at-a-glance
  * summary of every change made to the list relative to the snapshot taken when
@@ -189,7 +191,8 @@ final class DiffBarOverlay extends JComponent implements TableModelListener {
      * Computes LCS-based mapping: for each index {@code j} in {@code current},
      * returns the matched index in {@code original}, or {@code -1} if unmatched.
      */
-    private static int[] computeMapping(List<?> original, List<?> current) {
+    @VisibleForTesting
+    static int[] computeMapping(List<?> original, List<?> current) {
         int n = original.size();
         int m = current.size();
         int[][] dp = new int[n + 1][m + 1];

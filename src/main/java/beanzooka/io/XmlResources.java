@@ -267,7 +267,9 @@ public class XmlResources {
         xml.writeStartElement(JDK_TAG);
         writeValue(xml, LABEL_TAG, item.getLabel());
         writeValue(xml, JAVA_HOME_TAG, item.getJavaHome().toString());
-        writeValue(xml, OPTIONS_TAG, item.getOptions());
+        if (item.getOptions() != null) {
+            writeValue(xml, OPTIONS_TAG, item.getOptions());
+        }
         writeList(xml, CLUSTERS_TAG, item.getClusters(), XmlResources::writeCluster);
         xml.writeEndElement();
     }

@@ -26,6 +26,20 @@ class JdkTest {
     }
 
     @Test
+    void javaHomeProperty_returnsCurrentJvm() {
+        // SystemProperties.DEFAULT.getJavaHome() is always set while a JVM is running
+        assertThat(new Jdk.JavaHomeProperty().findResources())
+                .isNotEmpty();
+    }
+
+    @Test
+    void javaHomeEnv_doesNotThrow() {
+        // JAVA_HOME may or may not be set; the finder must not throw in either case
+        assertThatCode(() -> new Jdk.JavaHomeEnv().findResources())
+                .doesNotThrowAnyException();
+    }
+
+    @Test
     void testWhere() {
         assertThatCode(() -> new Jdk.WhereSearch().findResources())
                 .doesNotThrowAnyException();
