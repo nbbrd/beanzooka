@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-22
+
 This release improves UX with persistent selection state and visual diffing in list editors.
 It also extends JDK auto-detection to the system PATH.
 
@@ -95,7 +97,8 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nbbrd/beanzooka/compare/v1.1.0...v1.2.0
