@@ -16,15 +16,20 @@
  */
 package beanzooka.core;
 
+import lombok.AccessLevel;
+import lombok.NonNull;
+import nbbrd.design.StaticFactoryMethod;
+import nbbrd.design.VisibleForTesting;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Philippe Charles
@@ -33,6 +38,15 @@ import static java.util.stream.Collectors.toList;
 @lombok.Builder
 @lombok.With
 public class Plugin {
+
+    @StaticFactoryMethod
+    public static Plugin ofNbm(File file) {
+        return Plugin
+                .builder()
+                .label(file.getName().replace(".nbm", ""))
+                .file(file)
+                .build();
+    }
 
     @lombok.NonNull
     String label;
@@ -46,22 +60,40 @@ public class Plugin {
         }
     }
 
-    public static List<Plugin> ofDesktopSearch(Function<String, File[]> engine) {
-        return Stream.of(engine.apply(".nbm"))
-                .filter(Plugin::isNbm)
-                .map(Plugin::ofNbm)
-                .collect(toList());
+    public static List<Plugin> findPlugins(Function<String, File[]> engine) {
+        return ResourceFinder.findResources(List.of(new DesktopSearch(engine)));
     }
 
-    private static boolean isNbm(File file) {
-        return file.getName().endsWith(".nbm");
-    }
+    @VisibleForTesting
+    @lombok.RequiredArgsConstructor
+    static final class DesktopSearch implements ResourceFinder<Plugin> {
 
-    private static Plugin ofNbm(File file) {
-        return Plugin
+        @lombok.Getter(AccessLevel.PRIVATE)
+        @lombok.NonNull
+        private final Function<String, File[]> engine;
+
+        @lombok.experimental.Delegate
+        private final NbmSupport delegate = NbmSupport
                 .builder()
-                .label(file.getName().replace(".nbm", ""))
-                .file(file)
+                .runtime(() -> getEngine().apply(".nbm"))
                 .build();
+    }
+
+    @lombok.Builder
+    private static final class NbmSupport implements ResourceFinder<Plugin> {
+
+        private final Supplier<File[]> runtime;
+
+        @Override
+        public void addResourcesTo(@NonNull Consumer<? super Plugin> consumer) {
+            Stream.of(runtime.get())
+                    .filter(NbmSupport::isNbm)
+                    .map(Plugin::ofNbm)
+                    .forEach(consumer);
+        }
+
+        static boolean isNbm(@NonNull File file) {
+            return file.getName().endsWith(".nbm");
+        }
     }
 }

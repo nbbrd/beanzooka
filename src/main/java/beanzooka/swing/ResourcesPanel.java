@@ -75,6 +75,22 @@ public final class ResourcesPanel extends javax.swing.JPanel {
         return resources;
     }
 
+    public Resources getResourcesWithSelection() {
+        Resources.Builder builder = Resources.builder()
+                .jdks(resources.getJdks())
+                .apps(resources.getApps())
+                .userDirs(resources.getUserDirs())
+                .plugins(resources.getPlugins())
+                .selectedAppIndex(apps.getSelectedIndex() >= 0 ? apps.getSelectedIndex() : null)
+                .selectedJdkIndex(jdks.getSelectedIndex() >= 0 ? jdks.getSelectedIndex() : null)
+                .tempUserDirSelected(tempUserDir.isSelected())
+                .selectedUserDirIndex(userDirs.getSelectedIndex() >= 0 ? userDirs.getSelectedIndex() : null);
+        for (int idx : plugins.getSelectedIndices()) {
+            builder.selectedPluginIndex(idx);
+        }
+        return builder.build();
+    }
+
     public void setResources(Resources resources) {
         Objects.requireNonNull(resources);
         firePropertyChange(RESOURCES_PROPERTY, this.resources, this.resources = resources);
@@ -180,6 +196,7 @@ public final class ResourcesPanel extends javax.swing.JPanel {
             jdks.setModel(SwingUtil.modelOf(resources.getJdks()));
             userDirs.setModel(SwingUtil.modelOf(resources.getUserDirs()));
             plugins.setModel(SwingUtil.modelOf(resources.getPlugins()));
+            restoreSelection(resources);
         } else {
             apps.setModel(new DefaultComboBoxModel<>());
             jdks.setModel(new DefaultComboBoxModel<>());
@@ -187,6 +204,31 @@ public final class ResourcesPanel extends javax.swing.JPanel {
             plugins.setModel(new DefaultComboBoxModel<>());
         }
         updateConfiguration();
+    }
+
+    private void restoreSelection(Resources r) {
+        if (r.getSelectedAppIndex() != null && r.getSelectedAppIndex() < apps.getModel().getSize()) {
+            apps.setSelectedIndex(r.getSelectedAppIndex());
+        } else {
+            apps.setSelectedIndex(apps.getModel().getSize() > 0 ? 0 : -1);
+        }
+        if (r.getSelectedJdkIndex() != null && r.getSelectedJdkIndex() < jdks.getModel().getSize()) {
+            jdks.setSelectedIndex(r.getSelectedJdkIndex());
+        } else {
+            jdks.setSelectedIndex(jdks.getModel().getSize() > 0 ? 0 : -1);
+        }
+        tempUserDir.setSelected(r.isTempUserDirSelected());
+        if (r.getSelectedUserDirIndex() != null && r.getSelectedUserDirIndex() < userDirs.getModel().getSize()) {
+            userDirs.setSelectedIndex(r.getSelectedUserDirIndex());
+        } else {
+            userDirs.setSelectedIndex(userDirs.getModel().getSize() > 0 ? 0 : -1);
+        }
+        if (!r.getSelectedPluginIndices().isEmpty()) {
+            int[] indices = r.getSelectedPluginIndices().stream().mapToInt(Integer::intValue)
+                    .filter(idx -> idx < plugins.getModel().getSize())
+                    .toArray();
+            plugins.setSelectedIndices(indices);
+        }
     }
 
     private void onConfigurationChange(PropertyChangeEvent event) {

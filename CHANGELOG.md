@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-22
+
+This release improves UX with persistent selection state and visual diffing in list editors.
+It also extends JDK auto-detection to the system PATH.
+
+### Added
+
+- Add UI selection persistence between sessions [#512](https://github.com/nbbrd/beanzooka/issues/512)
+- Add diff bar overlay in list editor [#513](https://github.com/nbbrd/beanzooka/issues/513)
+- Add search on path for autofill JDK [#395](https://github.com/nbbrd/beanzooka/issues/395)
+
+### Changed
+
+- Migrate OSSRH to Central Portal
+
 ## [1.4.0] - 2025-03-11
 
 ### Added
@@ -78,7 +93,12 @@ Beanzooka follows [semantic versioning](https://semver.org/).
 This is the initial release of **Beanzooka**.   
 Beanzooka follows [semantic versioning](https://semver.org/).
 
-[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...HEAD
+### Added
+
+- Initial release
+
+[Unreleased]: https://github.com/nbbrd/beanzooka/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/nbbrd/beanzooka/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/nbbrd/beanzooka/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nbbrd/beanzooka/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nbbrd/beanzooka/compare/v1.1.0...v1.2.0

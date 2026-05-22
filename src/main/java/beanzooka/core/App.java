@@ -16,15 +16,19 @@
  */
 package beanzooka.core;
 
+import lombok.AccessLevel;
+import lombok.NonNull;
+import nbbrd.design.StaticFactoryMethod;
+import nbbrd.design.VisibleForTesting;
 import nbbrd.io.sys.OS;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Philippe Charles
@@ -33,6 +37,18 @@ import static java.util.stream.Collectors.toList;
 @lombok.Builder
 @lombok.With
 public class App {
+
+    @StaticFactoryMethod
+    public static App ofNetBeansRuntime(File runtime) {
+        if (!OS.NAME.equals(OS.Name.WINDOWS)) {
+            runtime = Paths.get(runtime.toString().replace(".exe", "")).toFile();
+        }
+        return App
+                .builder()
+                .label(runtime.getParentFile().getParentFile().getName())
+                .file(runtime)
+                .build();
+    }
 
     @lombok.NonNull
     String label;
@@ -48,28 +64,43 @@ public class App {
         return file.getName().replace("64.exe", "").replace(".exe", "");
     }
 
-    public static List<App> ofDesktopSearch(Function<String, File[]> engine) {
-        return Stream.of(engine.apply("64.exe"))
-                .filter(App::isNetBeansPlatform)
-                .map(App::ofNetBeansPlatform)
-                .collect(toList());
+    public static List<App> findApps(Function<String, File[]> engine) {
+        return ResourceFinder.findResources(List.of(new DesktopSearch(engine)));
     }
 
-    private static boolean isNetBeansPlatform(File file) {
-        return file.getName().endsWith("64.exe")
-                && file.getParentFile() != null
-                && file.getParentFile().getName().equals("bin")
-                && file.getParentFile().getParentFile() != null;
-    }
+    @VisibleForTesting
+    @lombok.RequiredArgsConstructor
+    static final class DesktopSearch implements ResourceFinder<App> {
 
-    private static App ofNetBeansPlatform(File file) {
-        if (!OS.NAME.equals(OS.Name.WINDOWS)) {
-            file = Paths.get(file.toString().replace(".exe", "")).toFile();
-        }
-        return App
+        @lombok.Getter(AccessLevel.PRIVATE)
+        @lombok.NonNull
+        private final Function<String, File[]> engine;
+
+        @lombok.experimental.Delegate
+        private final NetBeansRuntimeSupport delegate = NetBeansRuntimeSupport
                 .builder()
-                .label(file.getParentFile().getParentFile().getName())
-                .file(file)
+                .runtime(() -> getEngine().apply("64.exe"))
                 .build();
+    }
+
+    @lombok.Builder
+    private static final class NetBeansRuntimeSupport implements ResourceFinder<App> {
+
+        private final Supplier<File[]> runtime;
+
+        @Override
+        public void addResourcesTo(@NonNull Consumer<? super App> consumer) {
+            Stream.of(runtime.get())
+                    .filter(NetBeansRuntimeSupport::isNetBeansRuntime)
+                    .map(App::ofNetBeansRuntime)
+                    .forEach(consumer);
+        }
+
+        static boolean isNetBeansRuntime(@NonNull File file) {
+            return file.getName().endsWith("64.exe")
+                    && file.getParentFile() != null
+                    && file.getParentFile().getName().equals("bin")
+                    && file.getParentFile().getParentFile() != null;
+        }
     }
 }

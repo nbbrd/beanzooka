@@ -16,10 +16,20 @@
  */
 package beanzooka.core;
 
+import lombok.AccessLevel;
+import lombok.NonNull;
+import nbbrd.design.StaticFactoryMethod;
+import nbbrd.design.VisibleForTesting;
+import nbbrd.io.sys.OS;
+import nbbrd.io.sys.ProcessReader;
 import nbbrd.io.sys.SystemProperties;
+import nbbrd.io.win.WhereWrapper;
+import org.jspecify.annotations.Nullable;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -27,7 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +52,15 @@ import static java.util.stream.Collectors.toList;
 @lombok.Builder
 @lombok.With
 public class Jdk {
+
+    @StaticFactoryMethod
+    public static Jdk ofJavaHome(File javaHome) {
+        return Jdk
+                .builder()
+                .label(javaHome.getName())
+                .javaHome(javaHome)
+                .build();
+    }
 
     @lombok.NonNull
     String label;
@@ -73,7 +94,7 @@ public class Jdk {
                 .entrySet()
                 .stream()
                 .map(o -> o.getKey() + "=\"" + o.getValue() + "\"")
-                .collect(Collectors.toList());
+                .collect(toList());
         Files.write(file.toPath(), content, StandardOpenOption.CREATE);
     }
 
@@ -82,46 +103,120 @@ public class Jdk {
     }
 
     public static List<File> toFiles(String files) {
-        return Stream.of(files.split(File.pathSeparator, -1)).map(File::new).collect(Collectors.toList());
+        return Stream.of(files.split(File.pathSeparator, -1)).map(File::new).collect(toList());
     }
 
-    public static Optional<Jdk> ofSystemProperty() {
-        return Optional
-                .ofNullable(SystemProperties.DEFAULT.getJavaHome())
-                .map(Path::toFile)
-                .map(Jdk::ofFolder);
+    public static List<Jdk> findJdks(Function<String, File[]> engine) {
+        return ResourceFinder.findResources(List.of(
+                new JavaHomeProperty(),
+                new JavaHomeEnv(),
+                new DesktopSearch(engine),
+                new WhereSearch()
+        ));
     }
 
-    public static Optional<Jdk> ofEnvironmentVariable() {
-        return Optional
-                .ofNullable(System.getenv("JAVA_HOME"))
-                .map(File::new)
-                .map(Jdk::ofFolder);
-    }
+    @VisibleForTesting
+    static final class JavaHomeProperty implements ResourceFinder<Jdk> {
 
-    public static List<Jdk> ofDesktopSearch(Function<String, File[]> engine) {
-        return Stream.of(engine.apply("javaw"))
-                .filter(Jdk::isJavaRuntime)
-                .map(Jdk::ofJavaRuntime)
-                .collect(toList());
-    }
-
-    private static boolean isJavaRuntime(File file) {
-        return file.getName().replace(".exe", "").equals("javaw")
-                && file.getParentFile() != null
-                && file.getParentFile().getName().equals("bin")
-                && file.getParentFile().getParentFile() != null;
-    }
-
-    private static Jdk ofJavaRuntime(File file) {
-        return ofFolder(file.getParentFile().getParentFile());
-    }
-
-    private static Jdk ofFolder(File javaHome) {
-        return Jdk
+        @lombok.experimental.Delegate
+        private final JavaHomeSupport delegate = JavaHomeSupport
                 .builder()
-                .label(javaHome.getName())
-                .javaHome(javaHome)
+                .homeOf(SystemProperties.DEFAULT::getJavaHome, Path::toFile)
                 .build();
+    }
+
+    @VisibleForTesting
+    static final class JavaHomeEnv implements ResourceFinder<Jdk> {
+
+        @lombok.experimental.Delegate
+        private final JavaHomeSupport delegate = JavaHomeSupport
+                .builder()
+                .homeOf(() -> System.getenv("JAVA_HOME"), File::new)
+                .build();
+    }
+
+    @VisibleForTesting
+    @lombok.RequiredArgsConstructor
+    static final class DesktopSearch implements ResourceFinder<Jdk> {
+
+        @lombok.Getter(AccessLevel.PRIVATE)
+        @lombok.NonNull
+        private final Function<String, File[]> engine;
+
+        @lombok.experimental.Delegate
+        private final JavaRuntimeSupport delegate = JavaRuntimeSupport
+                .builder()
+                .runtime(() -> getEngine().apply("javaw"))
+                .build();
+    }
+
+    @VisibleForTesting
+    static final class WhereSearch implements ResourceFinder<Jdk> {
+
+        @lombok.experimental.Delegate
+        private final JavaRuntimeSupport delegate = JavaRuntimeSupport
+                .builder()
+                .runtime(WhereSearch::where)
+                .build();
+
+        private static File[] where() {
+            if (OS.NAME.equals(OS.Name.WINDOWS)) {
+                try {
+                    Process p = new ProcessBuilder(WhereWrapper.COMMAND, "javaw")
+                            .redirectError(ProcessBuilder.Redirect.INHERIT)
+                            .start();
+                    try (BufferedReader reader = ProcessReader.newReader(Charset.defaultCharset(), p)) {
+                        return reader.lines().map(File::new).toArray(File[]::new);
+                    }
+                } catch (IOException ignore) {
+                }
+            }
+            return new File[0];
+        }
+    }
+
+    @lombok.Builder
+    private static final class JavaHomeSupport implements ResourceFinder<Jdk> {
+
+        private final Supplier<Stream<File>> home;
+
+        @Override
+        public void addResourcesTo(@NonNull Consumer<? super Jdk> consumer) {
+            home.get()
+                    .map(Jdk::ofJavaHome)
+                    .forEach(consumer);
+        }
+
+        public static final class Builder {
+
+            public <X> Builder homeOf(Supplier<@Nullable X> supplier, Function<@NonNull X, File> converter) {
+                return home(() -> Optional.ofNullable(supplier.get()).map(converter).stream());
+            }
+        }
+    }
+
+    @lombok.Builder
+    private static final class JavaRuntimeSupport implements ResourceFinder<Jdk> {
+
+        private final Supplier<File[]> runtime;
+
+        @Override
+        public void addResourcesTo(@NonNull Consumer<? super Jdk> consumer) {
+            Stream.of(runtime.get())
+                    .filter(JavaRuntimeSupport::isJavaRuntime)
+                    .map(javaRuntime -> ofJavaHome(toJavaHome(javaRuntime)))
+                    .forEach(consumer);
+        }
+
+        static boolean isJavaRuntime(@NonNull File javaRuntime) {
+            return javaRuntime.getName().replace(".exe", "").equals("javaw")
+                    && javaRuntime.getParentFile() != null
+                    && javaRuntime.getParentFile().getName().equals("bin")
+                    && toJavaHome(javaRuntime) != null;
+        }
+
+        static File toJavaHome(@NonNull File javaRuntime) {
+            return javaRuntime.getParentFile().getParentFile();
+        }
     }
 }

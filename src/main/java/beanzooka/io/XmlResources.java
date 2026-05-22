@@ -17,15 +17,16 @@
 package beanzooka.io;
 
 import beanzooka.core.*;
+import lombok.NonNull;
 import nbbrd.io.xml.Stax;
 import nbbrd.io.xml.Xml;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.List;
 public class XmlResources {
 
     public static final Xml.Parser<Resources> PARSER = Stax.StreamParser.valueOf(XmlResources::readResources);
-    public static final Xml.Formatter<Resources> FORMATTER = Stax.StreamFormatter.valueOf(XmlResources::writeResources);
+    public static final Xml.Formatter<Resources> FORMATTER = Stax.StreamFormatter.of(XmlResources::writeResources);
 
     @NonNull
     public Resources read(@NonNull Path file) throws IOException {
@@ -66,6 +67,9 @@ public class XmlResources {
                             break;
                         case PLUGIN_TAG:
                             result.plugin(readPlugin(xml));
+                            break;
+                        case SELECTION_TAG:
+                            readSelection(xml, result);
                             break;
                     }
                     break;
@@ -200,12 +204,62 @@ public class XmlResources {
         throw new RuntimeException();
     }
 
-    private void writeResources(Resources resources, XMLStreamWriter xml) throws XMLStreamException {
+    private void readSelection(XMLStreamReader xml, Resources.Builder result) throws XMLStreamException {
+        while (xml.hasNext()) {
+            switch (xml.next()) {
+                case XMLStreamReader.START_ELEMENT:
+                    switch (xml.getLocalName()) {
+                        case SELECTION_APP_INDEX_TAG:
+                            result.selectedAppIndex(Integer.parseInt(xml.getElementText()));
+                            break;
+                        case SELECTION_JDK_INDEX_TAG:
+                            result.selectedJdkIndex(Integer.parseInt(xml.getElementText()));
+                            break;
+                        case SELECTION_TEMP_USER_DIR_TAG:
+                            result.tempUserDirSelected(Boolean.parseBoolean(xml.getElementText()));
+                            break;
+                        case SELECTION_USER_DIR_INDEX_TAG:
+                            result.selectedUserDirIndex(Integer.parseInt(xml.getElementText()));
+                            break;
+                        case SELECTION_PLUGIN_INDEX_TAG:
+                            result.selectedPluginIndex(Integer.parseInt(xml.getElementText()));
+                            break;
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    if (xml.getLocalName().equals(SELECTION_TAG)) {
+                        return;
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void writeResources(Resources resources, XMLStreamWriter xml, Charset encoding) throws XMLStreamException {
         xml.writeStartElement(RESOURCES_TAG);
         writeList(xml, JDKS_TAG, resources.getJdks(), XmlResources::writeJdk);
         writeList(xml, APPS_TAG, resources.getApps(), XmlResources::writeApp);
         writeList(xml, USER_DIRS_TAG, resources.getUserDirs(), XmlResources::writeUserDir);
         writeList(xml, PLUGINS_TAG, resources.getPlugins(), XmlResources::writePlugin);
+        writeSelection(resources, xml);
+        xml.writeEndElement();
+    }
+
+    private void writeSelection(Resources resources, XMLStreamWriter xml) throws XMLStreamException {
+        xml.writeStartElement(SELECTION_TAG);
+        if (resources.getSelectedAppIndex() != null) {
+            writeValue(xml, SELECTION_APP_INDEX_TAG, resources.getSelectedAppIndex().toString());
+        }
+        if (resources.getSelectedJdkIndex() != null) {
+            writeValue(xml, SELECTION_JDK_INDEX_TAG, resources.getSelectedJdkIndex().toString());
+        }
+        writeValue(xml, SELECTION_TEMP_USER_DIR_TAG, Boolean.toString(resources.isTempUserDirSelected()));
+        if (resources.getSelectedUserDirIndex() != null) {
+            writeValue(xml, SELECTION_USER_DIR_INDEX_TAG, resources.getSelectedUserDirIndex().toString());
+        }
+        for (Integer idx : resources.getSelectedPluginIndices()) {
+            writeValue(xml, SELECTION_PLUGIN_INDEX_TAG, idx.toString());
+        }
         xml.writeEndElement();
     }
 
@@ -213,7 +267,9 @@ public class XmlResources {
         xml.writeStartElement(JDK_TAG);
         writeValue(xml, LABEL_TAG, item.getLabel());
         writeValue(xml, JAVA_HOME_TAG, item.getJavaHome().toString());
-        writeValue(xml, OPTIONS_TAG, item.getOptions());
+        if (item.getOptions() != null) {
+            writeValue(xml, OPTIONS_TAG, item.getOptions());
+        }
         writeList(xml, CLUSTERS_TAG, item.getClusters(), XmlResources::writeCluster);
         xml.writeEndElement();
     }
@@ -280,4 +336,10 @@ public class XmlResources {
     private static final String FOLDER_TAG = "folder";
     private static final String PLUGIN_TAG = "plugin";
     private static final String APP_TAG = "app";
+    private static final String SELECTION_TAG = "selection";
+    private static final String SELECTION_APP_INDEX_TAG = "appIndex";
+    private static final String SELECTION_JDK_INDEX_TAG = "jdkIndex";
+    private static final String SELECTION_TEMP_USER_DIR_TAG = "tempUserDir";
+    private static final String SELECTION_USER_DIR_INDEX_TAG = "userDirIndex";
+    private static final String SELECTION_PLUGIN_INDEX_TAG = "pluginIndex";
 }

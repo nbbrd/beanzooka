@@ -16,6 +16,8 @@
  */
 package beanzooka.core;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 /**
@@ -38,4 +40,19 @@ public class Resources {
 
     @lombok.Singular
     List<Plugin> plugins;
+
+    @Nullable
+    Integer selectedAppIndex;
+
+    @Nullable
+    Integer selectedJdkIndex;
+
+    @lombok.Builder.Default
+    boolean tempUserDirSelected = true;
+
+    @Nullable
+    Integer selectedUserDirIndex;
+
+    @lombok.Singular
+    List<Integer> selectedPluginIndices;
 }
