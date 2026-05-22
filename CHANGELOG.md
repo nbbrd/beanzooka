@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release improves UX with persistent selection state and visual diffing in list editors.
+It also extends JDK auto-detection to the system PATH.
+
 ### Added
 
 - Add UI selection persistence between sessions [#512](https://github.com/nbbrd/beanzooka/issues/512)
