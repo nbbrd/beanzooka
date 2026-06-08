@@ -178,6 +178,11 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.6</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.6</version>
+                </plugin>
                 <!-- Other plugins -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -243,11 +248,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>templating-maven-plugin</artifactId>
                     <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.6</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -338,6 +338,7 @@
                             <manifestEntries>
                                 <Main-Class>${project.x.mainClass}</Main-Class>
                                 <SplashScreen-Image>${project.x.splash}</SplashScreen-Image>
+                                <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -748,7 +749,8 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
+                            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/
+                            </centralSnapshotsUrl>
                         </configuration>
                     </plugin>
                 </plugins>

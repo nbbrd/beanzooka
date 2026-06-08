@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix warnings when running CLI with Java25+ [#526](https://github.com/nbbrd/beanzooka/issues/526)
+
 ## [1.5.0] - 2026-05-22
 
 This release improves UX with persistent selection state and visual diffing in list editors.
