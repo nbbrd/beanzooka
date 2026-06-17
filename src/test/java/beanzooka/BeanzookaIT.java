@@ -30,7 +30,8 @@ class BeanzookaIT {
         assertThat(uberjar)
                 .existsNoFollowLinks().isRegularFile()
                 .extracting(unchecked(javaRuntime::getVersion), STRING)
-                .contains("Beanzooka", javaRuntime.getJavaVersion());
+                .contains("Beanzooka", javaRuntime.getJavaVersion())
+                .doesNotContainIgnoringCase("warning");
 
     }
 
