@@ -35,13 +35,13 @@ It also extends JDK auto-detection to the system PATH.
 - Add version parameter to Main method [#393](https://github.com/nbbrd/beanzooka/issues/393)
 - Add deployment to Maven Central [#392](https://github.com/nbbrd/beanzooka/issues/392)
 
-### Fixed
-
-- Fix auto reload of latest workspace if input file is not found [#394](https://github.com/nbbrd/beanzooka/issues/394)
-
 ### Changed
 
 - Modernize use of NIO API
+
+### Fixed
+
+- Fix auto reload of latest workspace if input file is not found [#394](https://github.com/nbbrd/beanzooka/issues/394)
 
 ## [1.3.0] - 2024-07-16
 
@@ -62,14 +62,14 @@ It also extends JDK auto-detection to the system PATH.
 - Add distribution to Scoop (Windows)
 - Add distribution to Homebrew (macOS & Linux)
 
-### Fixed
-
-- Fix reordering by dnd [#32](https://github.com/nbbrd/beanzooka/issues/32)
-
 ### Changed
 
 - Remove specific binary for Windows
 - Change look&feel to FlatLightLaf [#138](https://github.com/nbbrd/beanzooka/issues/138)
+
+### Fixed
+
+- Fix reordering by dnd [#32](https://github.com/nbbrd/beanzooka/issues/32)
 
 ## [1.1.0] - 2019-09-25
 
